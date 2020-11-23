@@ -17,6 +17,7 @@ public class Customer {
     private Integer Id;
     private String fullName;
     private String email;
+    private Boolean verified;
     private String mobileNo;
     private String password;
 }

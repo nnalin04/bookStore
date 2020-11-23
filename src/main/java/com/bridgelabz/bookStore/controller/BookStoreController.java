@@ -20,4 +20,17 @@ public class BookStoreController {
         String message = service.registerUser(userDTO);
         return new ResponseEntity(message, HttpStatus.OK);
     }
+
+    @PutMapping("/{token}")
+    public ResponseEntity VerifyUser(@PathVariable String token){
+        String message = service.verifyUser(token);
+        return new ResponseEntity(message, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity loginUser(@RequestBody UserDTO userDTO){
+        String token = service.loginUser(userDTO);
+        return new ResponseEntity(token, HttpStatus.OK);
+    }
+
 }
