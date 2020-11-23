@@ -31,9 +31,12 @@ public class BookStoreService implements IBookStoreService{
     @Override
     public String verifyUser(String token) {
         Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(token));
-        customer.ifPresent(value -> value.setVerified(true));
-        customerRepository.save(customer.get());
-        return "Your emailId is verified";
+        if (customer.isPresent()){
+            customer.get().setVerified(true);
+            customerRepository.save(customer.get());
+            return "Your emailId is verified";
+        }
+        return "Please Please re-register for verification";
     }
 
     @Override
