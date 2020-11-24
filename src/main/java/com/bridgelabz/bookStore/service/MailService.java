@@ -17,7 +17,7 @@ public class MailService {
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setFrom("nnalin04@gmail.com");
         mail.setTo(userDTO.getEmail());
-        mail.setSubject("Token for reset password");
+        mail.setSubject("URL for reset password");
         mail.setText(getResetURL(message));
         javaMailSender.send(mail);
     }
@@ -37,6 +37,7 @@ public class MailService {
     }
 
     public static String getResetURL(String token) {
-        return "http://localhost:3000/resetpassword/"+token;
+        return "To reset your password please click on the link given billow \n" +
+                "http://localhost:3000/resetpassword/"+token;
     }
 }

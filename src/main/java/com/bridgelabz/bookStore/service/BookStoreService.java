@@ -1,5 +1,6 @@
 package com.bridgelabz.bookStore.service;
 
+import com.bridgelabz.bookStore.dto.ResetPassword;
 import com.bridgelabz.bookStore.dto.UserDTO;
 import com.bridgelabz.bookStore.modle.Customer;
 import com.bridgelabz.bookStore.repository.ICustomerRepository;
@@ -55,5 +56,26 @@ public class BookStoreService implements IBookStoreService{
             return "Please Verify your emailId through your provided Mail";
         }
         return "This email not registered";
+    }
+
+    @Override
+    public String forgotPassword(UserDTO userDTO) {
+        Optional<Customer> customer = customerRepository.findByEmail(userDTO.getEmail());
+        mail.sendSimpleMessage(userDTO, Token.getToken(customer.get().getId()));
+        return "Check your email for reset password link";
+    }
+
+    @Override
+    public String resetPassword(ResetPassword resetPassword, String token) {
+        Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(token));
+        if (resetPassword.getConformPassword().equals(resetPassword.getNewPassword())){
+            if (customer.isPresent()){
+                customer.get().setPassword(resetPassword.getNewPassword());
+                customerRepository.save(customer.get());
+                return "The password has been successfully reset";
+            }
+            return "Please follow the reset method again this link haas expired";
+        }
+        return "the new and confirm password are not matching";
     }
 }
