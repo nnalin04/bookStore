@@ -15,6 +15,9 @@ public class BookStoreService implements IBookStoreService{
     @Autowired
     ICustomerRepository customerRepository;
 
+    @Autowired
+    MailService mail;
+
     @Override
     public String registerUser(UserDTO userDTO) {
         if (customerRepository.findByEmail(userDTO.getEmail()).isPresent())
@@ -24,7 +27,8 @@ public class BookStoreService implements IBookStoreService{
         customer.setEmail(userDTO.getEmail());
         customer.setMobileNo(userDTO.getMobileNo());
         customer.setPassword(userDTO.getPassword());
-        customerRepository.save(customer);
+        Customer user = customerRepository.save(customer);
+        mail.sendMailWithTokenURL(userDTO.getEmail(), Token.getToken(user.getId()));
         return "Successfully Registered";
     }
 
