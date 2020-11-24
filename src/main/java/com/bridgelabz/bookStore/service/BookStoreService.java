@@ -1,13 +1,20 @@
 package com.bridgelabz.bookStore.service;
 
+import com.bridgelabz.bookStore.dto.BookDTO;
 import com.bridgelabz.bookStore.dto.ResetPassword;
+import com.bridgelabz.bookStore.dto.StoreDTO;
 import com.bridgelabz.bookStore.dto.UserDTO;
+import com.bridgelabz.bookStore.modle.Book;
 import com.bridgelabz.bookStore.modle.Customer;
+import com.bridgelabz.bookStore.modle.Store;
+import com.bridgelabz.bookStore.repository.IBookRepository;
 import com.bridgelabz.bookStore.repository.ICustomerRepository;
+import com.bridgelabz.bookStore.repository.IStoreRepository;
 import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +22,12 @@ public class BookStoreService implements IBookStoreService{
 
     @Autowired
     ICustomerRepository customerRepository;
+
+    @Autowired
+    IStoreRepository storeRepository;
+
+    @Autowired
+    IBookRepository bookRepository;
 
     @Autowired
     MailService mail;
@@ -77,5 +90,21 @@ public class BookStoreService implements IBookStoreService{
             return "Please follow the reset method again this link haas expired";
         }
         return "the new and confirm password are not matching";
+    }
+
+    @Override
+    public StoreDTO getStore() {
+        Optional<Store> store = storeRepository.findById(1);
+        List<Book> books = store.get().getBooks();
+        StoreDTO storeDTO = new StoreDTO();
+        List<BookDTO> booksList = storeDTO.getBooks();
+        books.forEach(book -> {
+            BookDTO bookDTO = new BookDTO();
+            bookDTO.setToken(Token.getToken(book.getId()));
+            bookDTO.setBook(book);
+            booksList.add(bookDTO);
+        });
+        storeDTO.setBooks(booksList);
+        return storeDTO;
     }
 }

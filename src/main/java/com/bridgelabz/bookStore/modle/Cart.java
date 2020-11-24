@@ -10,17 +10,12 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Customer {
+public class Cart {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer Id;
-    private String fullName;
-    private String email;
-    private Boolean verified;
-    private String mobileNo;
-    private String password;
+    private Integer noOfItems;
     @OneToMany
-    private List<AddressDetail> addressDetail = new ArrayList<>();
-    @OneToOne
-    private Cart userCart;
+    private List<SelectedBook> selectedBooks = new ArrayList<>();
 }
