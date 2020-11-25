@@ -1,6 +1,6 @@
-package com.bridgelabz.bookStore.service;
+package com.bridgelabz.bookStore.customer.service;
 
-import com.bridgelabz.bookStore.dto.UserDTO;
+import com.bridgelabz.bookStore.customer.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;

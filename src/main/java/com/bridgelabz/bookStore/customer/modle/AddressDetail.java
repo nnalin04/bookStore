@@ -1,4 +1,4 @@
-package com.bridgelabz.bookStore.modle;
+package com.bridgelabz.bookStore.customer.modle;
 
 import lombok.Getter;
 import lombok.Setter;

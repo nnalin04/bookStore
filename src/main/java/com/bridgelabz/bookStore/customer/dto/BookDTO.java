@@ -1,6 +1,6 @@
-package com.bridgelabz.bookStore.dto;
+package com.bridgelabz.bookStore.customer.dto;
 
-import com.bridgelabz.bookStore.modle.Book;
+import com.bridgelabz.bookStore.customer.modle.Book;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,5 +8,6 @@ import lombok.Setter;
 @Setter
 public class BookDTO {
     private String token;
+    private Integer quantity;
     private Book book;
 }

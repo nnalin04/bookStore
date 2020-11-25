@@ -1,6 +1,6 @@
-package com.bridgelabz.bookStore.repository;
+package com.bridgelabz.bookStore.customer.repository;
 
-import com.bridgelabz.bookStore.modle.Book;
+import com.bridgelabz.bookStore.customer.modle.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

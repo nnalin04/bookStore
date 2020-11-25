@@ -1,4 +1,4 @@
-package com.bridgelabz.bookStore.dto;
+package com.bridgelabz.bookStore.customer.dto;
 
 import lombok.Getter;
 import lombok.Setter;

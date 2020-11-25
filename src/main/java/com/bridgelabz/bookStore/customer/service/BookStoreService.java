@@ -1,15 +1,10 @@
-package com.bridgelabz.bookStore.service;
+package com.bridgelabz.bookStore.customer.service;
 
-import com.bridgelabz.bookStore.dto.BookDTO;
-import com.bridgelabz.bookStore.dto.ResetPassword;
-import com.bridgelabz.bookStore.dto.StoreDTO;
-import com.bridgelabz.bookStore.dto.UserDTO;
-import com.bridgelabz.bookStore.modle.Book;
-import com.bridgelabz.bookStore.modle.Customer;
-import com.bridgelabz.bookStore.modle.Store;
-import com.bridgelabz.bookStore.repository.IBookRepository;
-import com.bridgelabz.bookStore.repository.ICustomerRepository;
-import com.bridgelabz.bookStore.repository.IStoreRepository;
+import com.bridgelabz.bookStore.customer.dto.*;
+import com.bridgelabz.bookStore.customer.modle.*;
+import com.bridgelabz.bookStore.customer.repository.IBookRepository;
+import com.bridgelabz.bookStore.customer.repository.ICustomerRepository;
+import com.bridgelabz.bookStore.customer.repository.IStoreRepository;
 import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +26,9 @@ public class BookStoreService implements IBookStoreService{
 
     @Autowired
     MailService mail;
+
+    int count = 0;
+    boolean inCart = false;
 
     @Override
     public String registerUser(UserDTO userDTO) {
@@ -106,5 +104,64 @@ public class BookStoreService implements IBookStoreService{
         });
         storeDTO.setBooks(booksList);
         return storeDTO;
+    }
+
+    @Override
+    public Integer addToCart(BookDTO bookDTO, String token) {
+        Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(token));
+        List<SelectedBook> selectedBooks = customer.get().getUserCart().getSelectedBooks();
+        Optional<Book> book = bookRepository.findById(Token.decodeJWT(bookDTO.getToken()));
+        SelectedBook selectedBook = new SelectedBook();
+        selectedBook.setBook(book.get());
+        selectedBook.setQuantity(1);
+        selectedBooks.add(selectedBook);
+        customer.get().getUserCart().setNoOfItems(customer.get().getUserCart().getNoOfItems() + 1);
+        customer.get().getUserCart().setSelectedBooks(selectedBooks);
+        Customer user = customerRepository.save(customer.get());
+        return user.getUserCart().getSelectedBooks().size();
+    }
+
+    @Override
+    public Cart editCart(String userToken, BookDTO bookDTO) {
+        Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(userToken));
+        List<SelectedBook> selectedBooks = customer.get().getUserCart().getSelectedBooks();
+        Optional<Book> book = bookRepository.findById(Token.decodeJWT(bookDTO.getToken()));
+        int i = 0;
+        while (i < selectedBooks.size()) {
+            if (selectedBooks.get(i).getBook().equals(book.get())) {
+                if (bookDTO.getQuantity() == 0) {
+                    this.count -= selectedBooks.get(i).getQuantity();
+                    selectedBooks.remove(selectedBooks.get(i));
+                } else if (bookDTO.getQuantity() >= 1) {
+                    this.count = selectedBooks.get(i).getQuantity();
+                    selectedBooks.get(i).setQuantity(bookDTO.getQuantity());
+                    this.count = selectedBooks.get(i).getQuantity() - this.count;
+                }
+                break;
+            }
+            i++;
+        }
+        customer.get().getUserCart().setNoOfItems(customer.get().getUserCart().getNoOfItems() + this.count);
+        customer.get().getUserCart().setSelectedBooks(selectedBooks);
+        Customer user = customerRepository.save(customer.get());
+        return user.getUserCart();
+    }
+
+    @Override
+    public Cart removeFromCart(String userToken, String bookToken) {
+        Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(userToken));
+        Optional<Book> book = bookRepository.findById(Token.decodeJWT(bookToken));
+        List<SelectedBook> selectedBooks = customer.get().getUserCart().getSelectedBooks();
+        for (int i = 0; i < selectedBooks.size() ; i++) {
+            if (selectedBooks.get(i).getBook().equals(book.get())) {
+                this.count = selectedBooks.get(i).getQuantity();
+                selectedBooks.remove(selectedBooks.get(i));
+                break;
+            }
+        }
+        customer.get().getUserCart().setNoOfItems(customer.get().getUserCart().getNoOfItems() - this.count);
+        customer.get().getUserCart().setSelectedBooks(selectedBooks);
+        Customer user = customerRepository.save(customer.get());
+        return user.getUserCart();
     }
 }
