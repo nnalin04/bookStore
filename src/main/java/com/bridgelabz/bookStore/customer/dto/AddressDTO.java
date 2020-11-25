@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddressDTO {
+    private Integer id;
     private String type;
     private Long pinCode;
     private String locality;

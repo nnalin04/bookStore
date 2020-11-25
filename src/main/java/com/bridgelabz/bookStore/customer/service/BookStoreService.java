@@ -196,4 +196,22 @@ public class BookStoreService implements IBookStoreService{
         customer.get().setAddressDetail(addressDetails);
         return customerRepository.save(customer.get());
     }
+
+    @Override
+    public Customer editAddress(String userToken, AddressDTO addressDTO) {
+        Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(userToken));
+        List<AddressDetail> addressDetails = customer.get().getAddressDetail();
+        addressDetails.stream()
+                .filter(addressDetail -> addressDetail.getId().equals(addressDTO.getId()))
+                .forEach(addressDetail -> {
+                                            addressDetail.setAddress(addressDTO.getAddress());
+                                            addressDetail.setCity(addressDTO.getCity());
+                                            addressDetail.setLandmark(addressDTO.getLandmark());
+                                            addressDetail.setLocality(addressDTO.getLocality());
+                                            addressDetail.setPinCode(addressDTO.getPinCode());
+                                            addressDetail.setType(addressDTO.getType());
+                                        });
+        customer.get().setAddressDetail(addressDetails);
+        return customerRepository.save(customer.get());
+    }
 }

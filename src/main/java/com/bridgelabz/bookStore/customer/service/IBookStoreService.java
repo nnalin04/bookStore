@@ -16,4 +16,5 @@ public interface IBookStoreService {
     Cart editCart(String userToken, BookDTO bookDTO);
     Customer addAddress(String userToken, AddressDTO addressDTO);
     Customer editUser(String userToken, UserDTO userDTO);
+    Customer editAddress(String userToken, AddressDTO addressDTO);
 }

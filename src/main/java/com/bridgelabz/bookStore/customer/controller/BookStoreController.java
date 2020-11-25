@@ -82,4 +82,10 @@ public class BookStoreController {
         Customer customer = service.addAddress(userToken, addressDTO);
         return new ResponseEntity<>(customer, HttpStatus.OK);
     }
+
+    @PutMapping("/editAdddress/{userToken}")
+    public ResponseEntity editAddress(@PathVariable String userToken, @RequestBody AddressDTO addressDTO) {
+        Customer customer = service.editAddress(userToken, addressDTO);
+        return new ResponseEntity(customer, HttpStatus.OK);
+    }
 }
