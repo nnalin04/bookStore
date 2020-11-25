@@ -2,10 +2,7 @@ package com.bridgelabz.bookStore.customer.service;
 
 import com.bridgelabz.bookStore.customer.dto.*;
 import com.bridgelabz.bookStore.customer.modle.*;
-import com.bridgelabz.bookStore.customer.repository.IAddressRepository;
-import com.bridgelabz.bookStore.customer.repository.IBookRepository;
-import com.bridgelabz.bookStore.customer.repository.ICustomerRepository;
-import com.bridgelabz.bookStore.customer.repository.IStoreRepository;
+import com.bridgelabz.bookStore.customer.repository.*;
 import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +24,9 @@ public class BookStoreService implements IBookStoreService{
 
     @Autowired
     IAddressRepository addressRepository;
+
+    @Autowired
+    ISelectedRepository selectedRepository;
 
     @Autowired
     MailService mail;
@@ -95,6 +95,16 @@ public class BookStoreService implements IBookStoreService{
     }
 
     @Override
+    public Customer editUser(String userToken, UserDTO userDTO) {
+        Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(userToken));
+        customer.get().setFullName(userDTO.getFullName());
+        customer.get().setEmail(userDTO.getEmail());
+        customer.get().setMobileNo(userDTO.getMobileNo());
+        customer.get().setPassword(userDTO.getPassword());
+        return customerRepository.save(customer.get());
+    }
+
+    @Override
     public StoreDTO getStore() {
         Optional<Store> store = storeRepository.findById(1);
         List<Book> books = store.get().getBooks();
@@ -118,7 +128,8 @@ public class BookStoreService implements IBookStoreService{
         SelectedBook selectedBook = new SelectedBook();
         selectedBook.setBook(book.get());
         selectedBook.setQuantity(1);
-        selectedBooks.add(selectedBook);
+        SelectedBook selected = selectedRepository.save(selectedBook);
+        selectedBooks.add(selected);
         customer.get().getUserCart().setNoOfItems(customer.get().getUserCart().getNoOfItems() + 1);
         customer.get().getUserCart().setSelectedBooks(selectedBooks);
         Customer user = customerRepository.save(customer.get());
