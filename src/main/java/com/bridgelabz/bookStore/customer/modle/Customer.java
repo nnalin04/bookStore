@@ -20,9 +20,18 @@ public class Customer {
     private String mobileNo;
     private String password;
     @OneToMany
-    private List<AddressDetail> addressDetail = new ArrayList<>();
+    private List<AddressDetail> addressDetail;
+
+    {
+        addressDetail = new ArrayList<>();
+    }
+
     @OneToOne
     private Cart userCart;
     @OneToMany
-    private List<Order> myOrders = new ArrayList<>();
+    private List<MyOrder> myOrders;
+
+    {
+        myOrders = new ArrayList<>();
+    }
 }

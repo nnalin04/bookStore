@@ -2,6 +2,7 @@ package com.bridgelabz.bookStore.customer.service;
 
 import com.bridgelabz.bookStore.customer.dto.*;
 import com.bridgelabz.bookStore.customer.modle.*;
+import com.bridgelabz.bookStore.customer.repository.IAddressRepository;
 import com.bridgelabz.bookStore.customer.repository.IBookRepository;
 import com.bridgelabz.bookStore.customer.repository.ICustomerRepository;
 import com.bridgelabz.bookStore.customer.repository.IStoreRepository;
@@ -23,6 +24,9 @@ public class BookStoreService implements IBookStoreService{
 
     @Autowired
     IBookRepository bookRepository;
+
+    @Autowired
+    IAddressRepository addressRepository;
 
     @Autowired
     MailService mail;
@@ -163,5 +167,22 @@ public class BookStoreService implements IBookStoreService{
         customer.get().getUserCart().setSelectedBooks(selectedBooks);
         Customer user = customerRepository.save(customer.get());
         return user.getUserCart();
+    }
+
+    @Override
+    public Customer addAddress(String userToken, AddressDTO addressDTO) {
+        Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(userToken));
+        List<AddressDetail> addressDetails = customer.get().getAddressDetail();
+        AddressDetail addressDetail  = new AddressDetail();
+        addressDetail.setAddress(addressDTO.getAddress());
+        addressDetail.setCity(addressDTO.getCity());
+        addressDetail.setLandmark(addressDTO.getLandmark());
+        addressDetail.setLocality(addressDTO.getLocality());
+        addressDetail.setPinCode(addressDTO.getPinCode());
+        addressDetail.setType(addressDTO.getType());
+        AddressDetail address = addressRepository.save(addressDetail);
+        addressDetails.add(address);
+        customer.get().setAddressDetail(addressDetails);
+        return customerRepository.save(customer.get());
     }
 }
