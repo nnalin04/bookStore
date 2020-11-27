@@ -28,10 +28,4 @@ public class Customer {
 
     @OneToOne
     private Cart userCart;
-    @OneToMany
-    private List<MyOrder> myOrders;
-
-    {
-        myOrders = new ArrayList<>();
-    }
 }

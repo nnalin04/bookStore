@@ -36,6 +36,9 @@ dependencies {
 	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.6.1'
 	// https://mvnrepository.com/artifact/org.postgresql/postgresql
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.9'
+	compile 'com.google.code.gson:gson:2.2.+'
+	compile "com.opencsv:opencsv:4.0"
+	compile(files("./libs/CSVBuilder.main.jar"))
 }
 
 test {

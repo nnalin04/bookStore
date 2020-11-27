@@ -3,6 +3,9 @@ package com.bridgelabz.bookStore.customer.service;
 import com.bridgelabz.bookStore.customer.dto.*;
 import com.bridgelabz.bookStore.customer.modle.*;
 import com.bridgelabz.bookStore.customer.repository.*;
+import com.bridgelabz.bookStore.model.Book;
+import com.bridgelabz.bookStore.model.BookStoreCSV;
+import com.bridgelabz.bookStore.utility.CSVReader;
 import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +35,8 @@ public class BookStoreService implements IBookStoreService{
     MailService mail;
 
     int count = 0;
-    boolean inCart = false;
+
+    private static final String BOOK_CSV_FILE_PATH = "./src/main/resources/books_data.csv";
 
     @Override
     public String registerUser(UserDTO userDTO) {
@@ -105,26 +109,15 @@ public class BookStoreService implements IBookStoreService{
     }
 
     @Override
-    public StoreDTO getStore() {
-        Optional<Store> store = storeRepository.findById(1);
-        List<Book> books = store.get().getBooks();
-        StoreDTO storeDTO = new StoreDTO();
-        List<BookDTO> booksList = storeDTO.getBooks();
-        books.forEach(book -> {
-            BookDTO bookDTO = new BookDTO();
-            bookDTO.setToken(Token.getToken(book.getId()));
-            bookDTO.setBook(book);
-            booksList.add(bookDTO);
-        });
-        storeDTO.setBooks(booksList);
-        return storeDTO;
+    public List<Book> getBooks() {
+        return new CSVReader().loadCensusData(BookStoreCSV.class, BOOK_CSV_FILE_PATH);
     }
 
     @Override
     public Integer addToCart(BookDTO bookDTO, String token) {
         Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(token));
         List<SelectedBook> selectedBooks = customer.get().getUserCart().getSelectedBooks();
-        Optional<Book> book = bookRepository.findById(Token.decodeJWT(bookDTO.getToken()));
+        Optional<Book> book = bookRepository.findById(bookDTO.getBook().getId());
         SelectedBook selectedBook = new SelectedBook();
         selectedBook.setBook(book.get());
         selectedBook.setQuantity(1);
@@ -140,7 +133,7 @@ public class BookStoreService implements IBookStoreService{
     public Cart editCart(String userToken, BookDTO bookDTO) {
         Optional<Customer> customer = customerRepository.findById(Token.decodeJWT(userToken));
         List<SelectedBook> selectedBooks = customer.get().getUserCart().getSelectedBooks();
-        Optional<Book> book = bookRepository.findById(Token.decodeJWT(bookDTO.getToken()));
+        Optional<Book> book = bookRepository.findById(bookDTO.getBook().getId());
         int i = 0;
         while (i < selectedBooks.size()) {
             if (selectedBooks.get(i).getBook().equals(book.get())) {
