@@ -17,6 +17,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.jetbrains:annotations:19.0.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -39,6 +40,9 @@ dependencies {
 	compile 'com.google.code.gson:gson:2.2.+'
 	compile "com.opencsv:opencsv:4.0"
 	compile(files("./libs/CSVBuilder.main.jar"))
+	// https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
+	compile group: 'org.hibernate', name: 'hibernate-validator', version: '6.1.1.Final'
+
 }
 
 test {

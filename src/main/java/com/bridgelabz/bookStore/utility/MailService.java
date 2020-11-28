@@ -1,4 +1,4 @@
-package com.bridgelabz.bookStore.customer.service;
+package com.bridgelabz.bookStore.utility;
 
 import com.bridgelabz.bookStore.customer.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;

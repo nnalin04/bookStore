@@ -2,38 +2,41 @@ package com.bridgelabz.bookStore.utility;
 
 import com.bridgelabz.bookStore.exception.BookStoreException;
 import com.bridgelabz.bookStore.model.Book;
-import com.bridgelabz.bookStore.model.BookStoreCSV;
-import csvbuilder.CSVBuilderException;
-import csvbuilder.CSVBuilderFactory;
-import csvbuilder.ICSVBuilder;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.StreamSupport;
+
 
 public class CSVReader {
 
-    public List<Book> loadCensusData(Class<BookStoreCSV> bookStoreCSV, String filePath)
-            throws BookStoreException {
-        List<Book> books = new ArrayList<>();
-        try (Reader reader = Files.newBufferedReader(Paths.get(filePath))) {
-            ICSVBuilder csvBuilder = CSVBuilderFactory.createCSVBuilder();
-            Iterator csvFileIterator = csvBuilder.getCSVFileIterator(reader, bookStoreCSV);
-            Iterable<BookStoreCSV> csvIterable = () -> csvFileIterator;
-                StreamSupport.stream(csvIterable.spliterator(), false)
-                        .map(BookStoreCSV.class::cast)
-                        .forEach(bookCSV ->
-                                books.add(new Book(bookCSV))
-                        );
-            return books;
+    private static final String BOOK_CSV_FILE_PATH = "./src/main/resources/books_data.csv";
 
+    public List<Book> loadCensusData() throws BookStoreException{
+        List<Book> books = new ArrayList<>();
+        String line = "";
+        try (BufferedReader reader = new BufferedReader(new FileReader(BOOK_CSV_FILE_PATH))) {
+            while((line = reader.readLine()) != null){
+                String[] data = line.split(",");
+                if (data[0].equalsIgnoreCase("id"))
+                    continue;
+                Book book = new Book();
+                book.setId(Integer.valueOf(data[0]));
+                book.setAuthorName(data[1]);
+                book.setBookName(data[2]);
+                book.setImgURL(data[3]);
+                book.setPrice(Integer.valueOf(data[4]));
+                StringBuilder description = new StringBuilder();
+                for (int i = 5; i < data.length ; i++) {
+                    description.append(data[i]);
+                }
+                book.setBookDetail(String.valueOf(description));
+                books.add(book);
+            }
         } catch (IOException e) {
             throw new BookStoreException("Book Store data has faults");
-        } catch (CSVBuilderException e) {
-            throw new BookStoreException("Error occurred in loding the book store data");
         }
+        return books;
     }
 }

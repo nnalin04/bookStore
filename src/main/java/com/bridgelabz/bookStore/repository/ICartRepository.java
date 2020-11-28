@@ -1,6 +1,6 @@
-package com.bridgelabz.bookStore.customer.repository;
+package com.bridgelabz.bookStore.repository;
 
-import com.bridgelabz.bookStore.customer.modle.Cart;
+import com.bridgelabz.bookStore.model.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

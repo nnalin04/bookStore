@@ -15,7 +15,7 @@ public class AddressDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer Id;
+    private Integer id;
     private String type;
     private Long pinCode;
     private String locality;

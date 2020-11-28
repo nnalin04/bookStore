@@ -1,4 +1,4 @@
-package com.bridgelabz.bookStore.customer.repository;
+package com.bridgelabz.bookStore.repository;
 
 import com.bridgelabz.bookStore.model.Book;
 import org.springframework.data.jpa.repository.JpaRepository;

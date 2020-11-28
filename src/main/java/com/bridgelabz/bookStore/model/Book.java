@@ -3,9 +3,8 @@ package com.bridgelabz.bookStore.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.Objects;
 
@@ -20,19 +19,9 @@ public class Book {
     private String authorName;
     private String imgURL;
     private Integer price;
+    @Column(length = 2048)
     private String bookDetail;
     private Integer quantityInStock;
-
-    public Book(BookStoreCSV bookStoreCSV) {
-        this.id = bookStoreCSV.Id;
-        this.bookName = bookStoreCSV.bookName;
-        this.authorName = bookStoreCSV.authorName;
-        this.imgURL = bookStoreCSV.imgURL;
-        this.price = bookStoreCSV.price;
-        this.bookDetail = bookStoreCSV.bookDetail;
-    }
-
-    public Book() {}
 
     @Override
     public boolean equals(Object o) {

@@ -1,4 +1,4 @@
-package com.bridgelabz.bookStore.customer.modle;
+package com.bridgelabz.bookStore.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,16 +10,15 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-public class Cart {
+public class Orders {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer Id;
-    private Integer noOfItems;
+    private Integer id;
+    private Integer noOfItemsOrdered;
     @OneToMany
-    private List<SelectedBook> selectedBooks;
-
+    private List<SelectedBook> bookList;
     {
-        selectedBooks = new ArrayList<>();
+        bookList = new ArrayList<>();
     }
 }

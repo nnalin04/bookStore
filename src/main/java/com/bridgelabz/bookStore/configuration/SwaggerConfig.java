@@ -1,4 +1,4 @@
-package com.bridgelabz.bookStore.config;
+package com.bridgelabz.bookStore.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
