@@ -1,4 +1,4 @@
-package com.bridgelabz.bookStore.model;
+package com.bridgelabz.bookStore.admin.model;
 
 import lombok.Getter;
 import lombok.Setter;

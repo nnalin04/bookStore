@@ -1,11 +1,10 @@
-package com.bridgelabz.bookStore.model;
+package com.bridgelabz.bookStore.admin.model;
 
-import com.bridgelabz.bookStore.model.Book;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -17,8 +16,8 @@ public class SelectedBook {
     private Integer id;
     private Integer quantityInCart;
     private Integer quantityForOrder;
-    private LocalDate orderedDate;
-    private LocalDate deliveredDate;
+    private Date orderedDate;
+    private Date deliveredDate;
     @OneToOne
     private Book book;
 }

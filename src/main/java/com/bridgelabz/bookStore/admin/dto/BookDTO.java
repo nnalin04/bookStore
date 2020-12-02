@@ -1,6 +1,6 @@
-package com.bridgelabz.bookStore.dto;
+package com.bridgelabz.bookStore.admin.dto;
 
-import com.bridgelabz.bookStore.model.Book;
+import com.bridgelabz.bookStore.admin.model.Book;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,5 +8,6 @@ import lombok.Setter;
 @Setter
 public class BookDTO {
     private Integer userSelectedQuantity;
+    private String reason;
     private Book book;
 }

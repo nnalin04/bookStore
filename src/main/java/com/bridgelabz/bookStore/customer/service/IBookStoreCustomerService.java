@@ -1,9 +1,7 @@
 package com.bridgelabz.bookStore.customer.service;
 
 import com.bridgelabz.bookStore.customer.dto.*;
-import com.bridgelabz.bookStore.model.Cart;
 import com.bridgelabz.bookStore.customer.modle.Customer;
-import com.bridgelabz.bookStore.model.Book;
 
 public interface IBookStoreCustomerService {
     String registerUser(UserDTO userDTO);

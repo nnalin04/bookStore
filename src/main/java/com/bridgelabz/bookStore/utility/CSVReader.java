@@ -1,7 +1,7 @@
 package com.bridgelabz.bookStore.utility;
 
 import com.bridgelabz.bookStore.exception.BookStoreException;
-import com.bridgelabz.bookStore.model.Book;
+import com.bridgelabz.bookStore.admin.model.Book;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

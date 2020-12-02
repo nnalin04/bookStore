@@ -1,13 +1,13 @@
-package com.bridgelabz.bookStore.service;
+package com.bridgelabz.bookStore.admin.service;
 
 import com.bridgelabz.bookStore.customer.modle.Customer;
-import com.bridgelabz.bookStore.model.SelectedBook;
+import com.bridgelabz.bookStore.admin.model.SelectedBook;
 import com.bridgelabz.bookStore.customer.repository.*;
-import com.bridgelabz.bookStore.dto.CartDTO;
-import com.bridgelabz.bookStore.model.Book;
-import com.bridgelabz.bookStore.model.Cart;
-import com.bridgelabz.bookStore.repository.IBookRepository;
-import com.bridgelabz.bookStore.repository.ICartRepository;
+import com.bridgelabz.bookStore.admin.dto.CartDTO;
+import com.bridgelabz.bookStore.admin.model.Book;
+import com.bridgelabz.bookStore.admin.model.Cart;
+import com.bridgelabz.bookStore.admin.repository.IBookRepository;
+import com.bridgelabz.bookStore.admin.repository.ICartRepository;
 import com.bridgelabz.bookStore.utility.CSVReader;
 import com.bridgelabz.bookStore.utility.MailService;
 import com.bridgelabz.bookStore.utility.Token;
@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,9 +51,21 @@ public class StoreService implements IBookStoreService {
     }
 
     @Override
-    public List<Book> getBooks() {
+    public List<List<Book>> getBooks() {
         this.books = this.iBookRepository.findAll();
-        return this.books;
+        List<List<Book>> bookList = new ArrayList<>();
+        List<Book> innerBook = new ArrayList<>();
+        int count = 0;
+        for (int i = 0; i < this.books.size(); i++ ){
+            if (count == 15) {
+                bookList.add(innerBook);
+                innerBook = new ArrayList<>();
+                count = 0;
+            }
+            count++;
+            innerBook.add(this.books.get(i));
+        }
+        return bookList;
     }
 
     @Override

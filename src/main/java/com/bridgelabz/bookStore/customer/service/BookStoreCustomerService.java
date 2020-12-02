@@ -4,8 +4,8 @@ import com.bridgelabz.bookStore.customer.dto.*;
 import com.bridgelabz.bookStore.customer.modle.*;
 import com.bridgelabz.bookStore.customer.repository.*;
 import com.bridgelabz.bookStore.exception.BookStoreException;
-import com.bridgelabz.bookStore.repository.IBookRepository;
-import com.bridgelabz.bookStore.repository.ICartRepository;
+import com.bridgelabz.bookStore.admin.repository.IBookRepository;
+import com.bridgelabz.bookStore.admin.repository.ICartRepository;
 import com.bridgelabz.bookStore.utility.MailService;
 import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,9 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
         customer.setEmail(userDTO.getEmail());
         customer.setMobileNo(userDTO.getMobileNo());
         customer.setPassword(userDTO.getPassword());
+        customer.setVerified(false);
         Customer user = iCustomerRepository.save(customer);
-        mail.sendMailWithTokenURL(userDTO.getEmail(), Token.getToken(user.getId()));
+        mail.sendCustomerMailWithTokenURL(userDTO.getEmail(), Token.getToken(user.getId()));
         return "Successfully Registered";
     }
 
@@ -77,7 +78,7 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
     @Override
     public String forgotPassword(UserDTO userDTO) {
         Optional<Customer> customer = iCustomerRepository.findByEmail(userDTO.getEmail());
-        mail.sendSimpleMessage(userDTO, Token.getToken(customer.get().getId()));
+        mail.sendResetMessage(userDTO.getEmail(), Token.getToken(customer.get().getId()));
         return "Check your email for reset password link";
     }
 

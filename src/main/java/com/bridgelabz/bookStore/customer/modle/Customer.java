@@ -1,6 +1,7 @@
 package com.bridgelabz.bookStore.customer.modle;
 
-import com.bridgelabz.bookStore.model.Cart;
+import com.bridgelabz.bookStore.admin.model.Cart;
+import com.bridgelabz.bookStore.admin.model.Orders;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,6 +38,9 @@ public class Customer {
 
     @OneToMany
     private List<AddressDetail> addressDetail;
+
+    @OneToOne
+    private Orders myOrders;
 
     {
         addressDetail = new ArrayList<>();
