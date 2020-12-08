@@ -1,6 +1,7 @@
 package com.bridgelabz.bookStore.admin.controller;
 
 import com.bridgelabz.bookStore.admin.dto.CartDTO;
+import com.bridgelabz.bookStore.admin.dto.Store;
 import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.admin.model.Cart;
 import com.bridgelabz.bookStore.admin.service.IBookStoreService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
@@ -29,36 +31,32 @@ public class BookStoreCartController {
         iBookStoreService.createBookStore();
     }
 
-    @GetMapping("/getStore")
-    public ResponseEntity<List<List<Book>>> getBookStore(){
-        List<List<Book>> books = iBookStoreService.getBooks();
+    @GetMapping("/getStore/{currentPage}")
+    public ResponseEntity<Store> getBookStore(@PathVariable Integer currentPage){
+        Store books = iBookStoreService.getBooks(currentPage);
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
-    @PutMapping("/addToCart/{userToken}")
-    public ResponseEntity<Integer> addToCart(@PathVariable String userToken,
-                                             @RequestBody CartDTO cartDTO) {
-        Integer noOfItems = iBookStoreService.addToCart(cartDTO, userToken);
+    @PutMapping("/addToCart")
+    public ResponseEntity<Cart> addToCart(@RequestBody CartDTO cartDTO) {
+        Cart noOfItems = iBookStoreService.addToCart(cartDTO);
         return new ResponseEntity<>(noOfItems, HttpStatus.OK);
     }
 
-    @PutMapping("/editCart/{userToken}")
-    public ResponseEntity<Cart> editCart(@PathVariable String userToken,
-                                         @RequestBody CartDTO cartDTO) {
-        Cart cart = iBookStoreService.editCart(userToken, cartDTO);
+    @PutMapping("/editCart")
+    public ResponseEntity<Cart> editCart(@RequestBody CartDTO cartDTO) {
+        Cart cart = iBookStoreService.editCart(cartDTO);
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
-    @PutMapping("/removeFromCart/{userToken}")
-    public ResponseEntity<Cart> removeFromCart(@PathVariable String userToken,
-                                               @RequestBody CartDTO cartDTO) {
-        Cart cart = iBookStoreService.removeFromCart(userToken, cartDTO);
+    @PutMapping("/removeFromCart")
+    public ResponseEntity<Cart> removeFromCart(@RequestBody CartDTO cartDTO) {
+        Cart cart = iBookStoreService.removeFromCart(cartDTO);
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(BookStoreException.class)
-    public ErrorMessage handleBadRequest(HttpServletRequest req, Exception ex) {
-        return new ErrorMessage(ex.getMessage());
+    @PreDestroy
+    public void beforeServerClosing () {
+        iBookStoreService.beforeServerClosing();
     }
 }

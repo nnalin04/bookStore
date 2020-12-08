@@ -62,12 +62,20 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
     }
 
     @Override
-    public String loginUser(UserDTO userDTO) {
+    public CustomerDTO loginUser(UserDTO userDTO) {
         Optional<Customer> customer = iCustomerRepository.findByEmail(userDTO.getEmail());
         if (customer.isPresent()){
             if (customer.get().getVerified()){
                 if (customer.get().getPassword().equals(userDTO.getPassword())){
-                    return Token.getToken(customer.get().getId());
+                    CustomerDTO customerDTO = new CustomerDTO();
+                    customerDTO.setToken(Token.getToken(customer.get().getId()));
+                    customerDTO.setFullName(customer.get().getFullName());
+                    customerDTO.setEmail(customer.get().getEmail());
+                    customerDTO.setMobileNo(customer.get().getMobileNo());
+                    customerDTO.setAddressDetail(customer.get().getAddressDetail());
+                    customerDTO.setUserCart(customer.get().getUserCart());
+                    customerDTO.setMyOrders(customer.get().getMyOrders());
+                    return customerDTO;
                 }
             }
             throw new BookStoreException("Please Verify your emailId at the provided Mail");
@@ -89,7 +97,7 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
             if (customer.isPresent()){
                 customer.get().setPassword(resetPassword.getNewPassword());
                 iCustomerRepository.save(customer.get());
-                return "The password has been successfully reset";
+                return "The password has been successfully reset please login again";
             }
             throw new BookStoreException("Please follow the reset method again this link haas expired");
         }

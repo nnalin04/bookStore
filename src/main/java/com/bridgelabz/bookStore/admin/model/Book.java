@@ -20,6 +20,7 @@ public class Book {
     private String bookName;
     private String authorName;
     private String imgURL;
+    private boolean inCart = false;
     private Integer price;
     @Column(length = 2048)
     private String bookDetail;

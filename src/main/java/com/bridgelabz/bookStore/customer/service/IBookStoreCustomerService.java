@@ -5,7 +5,7 @@ import com.bridgelabz.bookStore.customer.modle.Customer;
 
 public interface IBookStoreCustomerService {
     String registerUser(UserDTO userDTO);
-    String loginUser(UserDTO userDTO);
+    CustomerDTO loginUser(UserDTO userDTO);
     String verifyUser(String token);
     String forgotPassword(UserDTO userDTO);
     String resetPassword(ResetPassword resetPassword, String token);

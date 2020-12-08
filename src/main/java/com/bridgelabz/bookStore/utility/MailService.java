@@ -61,6 +61,6 @@ public class MailService {
 
     public static String getResetURL(String token) {
         return "To reset your password please click on the link given billow \n" +
-                "http://localhost:3000/resetpassword/"+token;
+                "http://localhost:3000/resetPassword/"+token;
     }
 }

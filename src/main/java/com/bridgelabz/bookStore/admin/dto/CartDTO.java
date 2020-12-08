@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 public class CartDTO {
     private Integer id;
+    private String userToken;
     private Integer noOfItems;
     private BookDTO bookDTO;
     @OneToMany

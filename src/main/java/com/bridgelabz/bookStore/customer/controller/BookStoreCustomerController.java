@@ -33,9 +33,9 @@ public class BookStoreCustomerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody UserDTO userDTO) {
-        String token = iBookStoreCustomerService.loginUser(userDTO);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+    public ResponseEntity<CustomerDTO> loginUser(@RequestBody UserDTO userDTO) {
+        CustomerDTO customerDTO = iBookStoreCustomerService.loginUser(userDTO);
+        return new ResponseEntity<>(customerDTO, HttpStatus.OK);
     }
 
     @GetMapping("/forgotPassword")

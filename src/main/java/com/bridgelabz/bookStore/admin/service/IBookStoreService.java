@@ -1,19 +1,19 @@
 package com.bridgelabz.bookStore.admin.service;
 
 import com.bridgelabz.bookStore.admin.dto.CartDTO;
-import com.bridgelabz.bookStore.admin.model.Book;
+import com.bridgelabz.bookStore.admin.dto.Store;
 import com.bridgelabz.bookStore.admin.model.Cart;
-
-import java.util.List;
 
 public interface IBookStoreService {
     void createBookStore();
 
-    List<List<Book>> getBooks();
+    Store getBooks(Integer currentPage);
 
-    Integer addToCart(CartDTO cartDTO, String userToken);
+    Cart addToCart(CartDTO cartDTO);
 
-    Cart editCart(String userToken, CartDTO cartDTO);
+    Cart editCart(CartDTO cartDTO);
 
-    Cart removeFromCart(String userToken, CartDTO cartDTO);
+    Cart removeFromCart(CartDTO cartDTO);
+
+    void beforeServerClosing();
 }
