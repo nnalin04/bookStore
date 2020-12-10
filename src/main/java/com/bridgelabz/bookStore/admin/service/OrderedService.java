@@ -1,5 +1,6 @@
 package com.bridgelabz.bookStore.admin.service;
 
+import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.customer.modle.Customer;
 import com.bridgelabz.bookStore.customer.repository.IAddressRepository;
 import com.bridgelabz.bookStore.customer.repository.ICustomerRepository;
@@ -63,18 +64,16 @@ public class OrderedService implements IOrderedService{
                 iOrdersRepository.save(customer.get().getMyOrders());
                 iCustomerRepository.save(customer.get());
             }
-            List<SelectedBook> bookList = customer.get().getMyOrders().getBookList();
+            List<Book> bookList = customer.get().getMyOrders().getBookList();
             for (int i = 0; i < orderDTO.getBookList().size() ; i++) {
                 SelectedBook selectedBook = new SelectedBook();
-                selectedBook.setBook(orderDTO.getBookList().get(i).getBook());
-                selectedBook.setQuantityForOrder(orderDTO.getBookList().get(i).getQuantityForOrder());
+                selectedBook.setQuantityForOrder(orderDTO.getBookList().get(i)
+                                                .getSelectedBook().getQuantityForOrder());
                 selectedBook.setOrderedDate(Calendar.getInstance().getTime());
-                selectedBook.setQuantityInCart(selectedBook
-                        .getQuantityInCart() - selectedBook.getQuantityForOrder());
-                SelectedBook savedSelectedBook = iSelectedRepository.save(selectedBook);
+                iSelectedRepository.save(selectedBook);
                 mail.sendSimpleMessage(customer.get().getEmail(), "Book Store Order Status",
                         "Order was successfully Placed on "+ selectedBook.getDeliveredDate()+"");
-                bookList.add(savedSelectedBook);
+                this.removeOrderedFromCart(customer.get(), orderDTO.getBookList().get(i));
             }
             customer.get().getMyOrders().setBookList(bookList);
             return "Order was successfully Placed";
@@ -82,18 +81,32 @@ public class OrderedService implements IOrderedService{
         throw new BookStoreException("Login to checkout your orders");
     }
 
+    private void removeOrderedFromCart(Customer customer, Book book) {
+        List<Book> books = customer.getUserCart().getBooks();
+        for (int i = 0; i < books.size(); i++ ) {
+            if (books.get(i).getBookName().equals(book.getBookName())) {
+                books.get(i).setQuantityInCart(books.get(i).getQuantityInCart() -
+                        book.getSelectedBook().getQuantityForOrder());
+            }
+            if (books.get(i).getQuantityInCart() == 0) {
+                books.remove(books.get(i));
+            }
+        }
+    }
+
     @Override
     public String orderDelivery(String userToken, BookDTO bookDTO) {
         Optional<Customer> customer = iCustomerRepository.findById(Token.decodeJWT(userToken));
-        List<SelectedBook> bookList = customer.get().getMyOrders().getBookList();
+        List<Book> bookList = customer.get().getMyOrders().getBookList();
         for (int i = 0; i < bookList.size(); i++) {
-            SelectedBook selectedBook = bookList.get(i);
-            if (selectedBook.getBook().equals(bookDTO.getBook())) {
-                selectedBook.setDeliveredDate(Calendar.getInstance().getTime());
+            Book selectedBook = bookList.get(i);
+            if (selectedBook.equals(bookDTO.getBook())) {
+                selectedBook.getSelectedBook().setDeliveredDate(Calendar.getInstance().getTime());
             }
-            iSelectedRepository.save(selectedBook);
+            iSelectedRepository.save(selectedBook.getSelectedBook());
             mail.sendSimpleMessage(customer.get().getEmail(), "Book Store Delivery Status",
-                    "Order was successfully delivered on "+ selectedBook.getDeliveredDate()+"");
+                    "Order was successfully delivered on "+ selectedBook
+                                            .getSelectedBook().getDeliveredDate()+"");
             return "Order was successfully delivered";
         }
         throw new BookStoreException("Book will not be able to delivered due to some service problem payment" +

@@ -1,5 +1,6 @@
 package com.bridgelabz.bookStore.admin.dto;
 
+import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.admin.model.SelectedBook;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,7 @@ import java.util.List;
 public class OrderDTO {
     private Integer noOfItemsOrdered;
     @OneToMany
-    private List<SelectedBook> bookList;
+    private List<Book> bookList;
     {
         bookList = new ArrayList<>();
     }

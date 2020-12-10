@@ -17,7 +17,7 @@ public class Orders {
     private Integer id;
     private Integer noOfItemsOrdered;
     @OneToMany
-    private List<SelectedBook> bookList;
+    private List<Book> bookList;
     {
         bookList = new ArrayList<>();
     }

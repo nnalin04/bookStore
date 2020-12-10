@@ -5,8 +5,6 @@ import com.bridgelabz.bookStore.admin.dto.Store;
 import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.admin.model.Cart;
 import com.bridgelabz.bookStore.admin.service.IBookStoreService;
-import com.bridgelabz.bookStore.exception.BookStoreException;
-import com.bridgelabz.bookStore.exception.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 
 @CrossOrigin("*")
@@ -38,8 +34,8 @@ public class BookStoreCartController {
     }
 
     @PutMapping("/addToCart")
-    public ResponseEntity<Cart> addToCart(@RequestBody CartDTO cartDTO) {
-        Cart noOfItems = iBookStoreService.addToCart(cartDTO);
+    public ResponseEntity<List<Book>> addToCart(@RequestBody CartDTO cartDTO) {
+        List<Book> noOfItems = iBookStoreService.addToCart(cartDTO);
         return new ResponseEntity<>(noOfItems, HttpStatus.OK);
     }
 
@@ -53,6 +49,18 @@ public class BookStoreCartController {
     public ResponseEntity<Cart> removeFromCart(@RequestBody CartDTO cartDTO) {
         Cart cart = iBookStoreService.removeFromCart(cartDTO);
         return new ResponseEntity<>(cart, HttpStatus.OK);
+    }
+
+    @PostMapping("/bookInDisplay")
+    public ResponseEntity<Book> bookInDisplay(@RequestBody Book book) {
+        Book bookInDisplay = iBookStoreService.bookInDisplay(book);
+        return new ResponseEntity<>(bookInDisplay, HttpStatus.OK);
+    }
+
+    @GetMapping("/getBookToDisplay")
+    public ResponseEntity<Book> getBookToDisplay() {
+        Book book = iBookStoreService.getBookToDisplay();
+        return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
     @PreDestroy

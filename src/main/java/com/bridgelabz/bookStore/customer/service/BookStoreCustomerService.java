@@ -56,7 +56,8 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
         if (customer.isPresent()){
             customer.get().setVerified(true);
             iCustomerRepository.save(customer.get());
-            return "Your emailId is verified";
+            return "Your emailId is verified please click on the following given link \n" +
+                    "<link>http://localhost:3000/login</link>";
         }
         throw new BookStoreException("Please Please re-register for verification");
     }
