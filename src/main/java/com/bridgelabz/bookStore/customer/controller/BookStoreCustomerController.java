@@ -1,5 +1,5 @@
 package com.bridgelabz.bookStore.customer.controller;
-
+import com.bridgelabz.bookStore.admin.model.CartItem;
 import com.bridgelabz.bookStore.customer.dto.*;
 import com.bridgelabz.bookStore.customer.modle.Customer;
 import com.bridgelabz.bookStore.customer.service.IBookStoreCustomerService;
@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin("*")
 @RestController
@@ -60,6 +62,12 @@ public class BookStoreCustomerController {
                                                @RequestBody AddressDTO addressDTO) {
         Customer customer = iBookStoreCustomerService.addAddress(userToken, addressDTO);
         return new ResponseEntity<>(customer, HttpStatus.OK);
+    }
+
+    @GetMapping("/getCustomerCart/{token}")
+    public ResponseEntity<List<CartItem>> getCustomerCart(@PathVariable String token){
+        List<CartItem> books  = iBookStoreCustomerService.getCustomerCart(token);
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
     @PutMapping("/editAddress/{userToken}")

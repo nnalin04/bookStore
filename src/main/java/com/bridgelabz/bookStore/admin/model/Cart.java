@@ -17,9 +17,9 @@ public class Cart {
     private Integer id;
     private Integer noOfItems;
     @OneToMany
-    private List<Book> Books;
+    private List<CartItem> cartItems;
 
     {
-        Books = new ArrayList<>();
+        cartItems = new ArrayList<>();
     }
 }

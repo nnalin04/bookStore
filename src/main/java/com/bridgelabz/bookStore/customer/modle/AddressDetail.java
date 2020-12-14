@@ -17,9 +17,7 @@ public class AddressDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String type;
-    private Long pinCode;
-    private String locality;
     private String address;
     private String city;
-    private String landmark;
+    private String state;
 }

@@ -2,6 +2,7 @@ package com.bridgelabz.bookStore.admin.controller;
 
 import com.bridgelabz.bookStore.admin.dto.BookDTO;
 import com.bridgelabz.bookStore.admin.dto.OrderDTO;
+import com.bridgelabz.bookStore.admin.model.Cart;
 import com.bridgelabz.bookStore.admin.model.Orders;
 import com.bridgelabz.bookStore.admin.service.IOrderedService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,10 @@ public class BookStoreOrdersController {
     }
 
     @PostMapping("/{userToken}")
-    public ResponseEntity<String> checkOut(@PathVariable String userToken,
-                                           @RequestBody OrderDTO orderDTO) {
-        String message = iOrderedService.checkOut(userToken, orderDTO);
-        return new ResponseEntity<>(message, HttpStatus.OK);
+    public ResponseEntity<Cart> checkOut(@PathVariable String userToken,
+                                         @RequestBody OrderDTO orderDTO) {
+        Cart cart = iOrderedService.checkOut(userToken, orderDTO);
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
     @PutMapping("/{userToken}")

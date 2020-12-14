@@ -5,7 +5,7 @@ import com.bridgelabz.bookStore.customer.dto.ResetPassword;
 import com.bridgelabz.bookStore.customer.dto.UserDTO;
 import com.bridgelabz.bookStore.customer.modle.AddressDetail;
 import com.bridgelabz.bookStore.customer.repository.IAddressRepository;
-import com.bridgelabz.bookStore.customer.repository.ISelectedRepository;
+import com.bridgelabz.bookStore.admin.repository.IOrderedBookRepository;
 import com.bridgelabz.bookStore.admin.dto.BookDTO;
 import com.bridgelabz.bookStore.exception.BookStoreException;
 import com.bridgelabz.bookStore.admin.repository.IBookRepository;
@@ -36,7 +36,7 @@ public class BookStoreSellerService implements IBookStoreSeller {
     private IAddressRepository iAddressRepository;
 
     @Autowired
-    private ISelectedRepository iSelectedRepository;
+    private IOrderedBookRepository iOrderedBookRepository;
 
     @Autowired
     private ICartRepository iCartRepository;
@@ -139,9 +139,7 @@ public class BookStoreSellerService implements IBookStoreSeller {
             AddressDetail addressDetail  = new AddressDetail();
             addressDetail.setAddress(addressDTO.getAddress());
             addressDetail.setCity(addressDTO.getCity());
-            addressDetail.setLandmark(addressDTO.getLandmark());
-            addressDetail.setLocality(addressDTO.getLocality());
-            addressDetail.setPinCode(addressDTO.getPinCode());
+            addressDetail.setState(addressDTO.getState());
             addressDetail.setType(addressDTO.getType());
             AddressDetail address = iAddressRepository.save(addressDetail);
             addressDetails.add(address);
@@ -161,9 +159,7 @@ public class BookStoreSellerService implements IBookStoreSeller {
                     .forEach(addressDetail -> {
                         addressDetail.setAddress(addressDTO.getAddress());
                         addressDetail.setCity(addressDTO.getCity());
-                        addressDetail.setLandmark(addressDTO.getLandmark());
-                        addressDetail.setLocality(addressDTO.getLocality());
-                        addressDetail.setPinCode(addressDTO.getPinCode());
+                        addressDetail.setState(addressDTO.getState());
                         addressDetail.setType(addressDTO.getType());
                     });
             customer.get().setAddressDetail(addressDetails);

@@ -21,13 +21,10 @@ public class CustomerDTO {
     private String email;
     private Boolean verified;
     private String mobileNo;
-    @OneToMany
     private List<AddressDetail> addressDetail;
-    @OneToOne
     private Orders myOrders;
     {
         addressDetail = new ArrayList<>();
     }
-    @OneToOne
     private Cart userCart;
 }

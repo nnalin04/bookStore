@@ -1,12 +1,11 @@
 package com.bridgelabz.bookStore.admin.dto;
 
 import com.bridgelabz.bookStore.admin.model.Book;
-import com.bridgelabz.bookStore.admin.model.SelectedBook;
+import com.bridgelabz.bookStore.admin.model.CartItem;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,5 +17,5 @@ public class CartDTO {
     private String userToken;
     private Integer noOfItems;
     private BookDTO bookDTO;
-    private List<Book> books = new ArrayList<>();
+    private List<CartItem> cartItems = new ArrayList<>();
 }

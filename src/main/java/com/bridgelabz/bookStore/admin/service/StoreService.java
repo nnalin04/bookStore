@@ -2,15 +2,13 @@ package com.bridgelabz.bookStore.admin.service;
 
 import com.bridgelabz.bookStore.admin.dto.Store;
 import com.bridgelabz.bookStore.admin.model.BookInDisplay;
-import com.bridgelabz.bookStore.admin.repository.IBookInDisplayRepository;
+import com.bridgelabz.bookStore.admin.model.CartItem;
+import com.bridgelabz.bookStore.admin.repository.*;
 import com.bridgelabz.bookStore.customer.modle.Customer;
-import com.bridgelabz.bookStore.admin.model.SelectedBook;
 import com.bridgelabz.bookStore.customer.repository.*;
 import com.bridgelabz.bookStore.admin.dto.CartDTO;
 import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.admin.model.Cart;
-import com.bridgelabz.bookStore.admin.repository.IBookRepository;
-import com.bridgelabz.bookStore.admin.repository.ICartRepository;
 import com.bridgelabz.bookStore.utility.CSVReader;
 import com.bridgelabz.bookStore.utility.MailService;
 import com.bridgelabz.bookStore.utility.Token;
@@ -35,10 +33,13 @@ public class StoreService implements IBookStoreService {
     private IAddressRepository iAddressRepository;
 
     @Autowired
-    private ISelectedRepository iSelectedRepository;
+    private IOrderedBookRepository iOrderedBookRepository;
 
     @Autowired
     private ICartRepository iCartRepository;
+
+    @Autowired
+    ICartItemRepository iCartItemRepository;
 
     @Autowired
     IBookInDisplayRepository inDisplayRepository;
@@ -76,89 +77,61 @@ public class StoreService implements IBookStoreService {
         Store store = new Store();
         store.setTotalBooks(this.books.size());
         store.setNoOfPage(bookList.size());
-        store.setBooks(bookList.get(currentPage-1));
+        store.setBooks(bookList.get(currentPage - 1));
         return store;
     }
 
     @Override
-    public List<Book> addToCart(CartDTO cartDTO) {
-        List<Book> booksInCart = cartDTO.getBooks();
+    public List<CartItem> addToCart(CartDTO cartDTO) {
+        List<CartItem> booksInCart = cartDTO.getCartItems();
         Optional<Book> book = iBookRepository.findById(cartDTO.getBookDTO().getBook().getId());
-        if (cartDTO.getUserToken().length() > 0) {
+
+        CartItem cartItem = new CartItem();
+        cartItem.setBook(cartDTO.getBookDTO().getBook());
+        cartItem.setNoOfItems(cartDTO.getBookDTO().getUserSelectedQuantity());
+
+        if (cartDTO.getUserToken() != null) {
+
             Optional<Customer> customer = iCustomerRepository.findById(Token
-                                                             .decodeJWT(cartDTO.getUserToken()));
-            if (customer.get().getUserCart() == null){
-                customer.get().setUserCart(iCartRepository.save(new Cart()));
-            }
-            if (booksInCart.size() == 0){
-                booksInCart.add(book.get());
-            }
-            for (int i = 0; i < booksInCart.size(); i++){
-                if (customer.get().getUserCart().getBooks().size() == 0) {
-                    booksInCart.get(i).setInCart(true);
-                    customer.get().getUserCart().getBooks().add(booksInCart.get(i));
-                    customer.get().getUserCart().setNoOfItems(+1);
-                    iCartRepository.save(customer.get().getUserCart());
-                    iCustomerRepository.save(customer.get());
-                    booksInCart = customer.get().getUserCart().getBooks();
-                    this.inCart = true;
-                } else {
-                    for (int j = 0; j < customer.get().getUserCart().getBooks().size(); j++){
-                        if (!booksInCart.get(i).equals(
-                                customer.get().getUserCart().getBooks().get(j))) {
-                            customer.get().getUserCart().getBooks().add(booksInCart.get(i));
-                            iCartRepository.save(customer.get().getUserCart());
-                            iCustomerRepository.save(customer.get());
-                        }
-                        if (book.get().equals(
-                                customer.get().getUserCart().getBooks().get(j))){
-                            this.inCart = true;
-                        }
+                    .decodeJWT(cartDTO.getUserToken()));
+
+            if (customer.isPresent()) {
+
+                if (customer.get().getUserCart().getCartItems().size() == 0) {                    ;
+                    customer.get()
+                            .getUserCart()
+                            .setCartItems(iCartItemRepository.saveAll(booksInCart));
+                }
+
+                List<CartItem> books = customer.get().getUserCart().getCartItems();
+                books.stream().map(currentBook -> {
+                    if (currentBook.getBook().getId().equals(book.get().getId())) {
+                        books.remove(currentBook);
                     }
-                }
-                if (!inCart) {
-                    book.get().setInCart(true);
-                    customer.get().getUserCart().getBooks().add(iBookRepository.save(book.get()));
-                    customer.get().getUserCart().setNoOfItems(customer.get().getUserCart().getNoOfItems() + 1);
-                    iCartRepository.save(customer.get().getUserCart());
-                    booksInCart = iCustomerRepository.save(customer.get()).getUserCart().getBooks();
-                }
+                    return currentBook;
+                });
+                books.add(iCartItemRepository.save(cartItem));
+                customer.get().getUserCart().setCartItems(books);
+                booksInCart = iCustomerRepository.save(customer.get()).getUserCart().getCartItems();
             }
         } else {
-            for (int i = 0; i < booksInCart.size(); i++) {
-                if (!booksInCart.get(i).equals(book.get())) {
-                    book.get().setInCart(true);
-                    booksInCart.add(book.get());
-                }
-            }
+            booksInCart.add(cartItem);
         }
         return booksInCart;
     }
 
-    private Integer noOfItemsInCart(List<Book> Books) {
-        Integer counter = 0;
-        for (Book selectedBook : Books) {
-            counter += selectedBook.getQuantityInCart();
-        }
-        return counter;
-    }
-
     @Override
     public Cart editCart(CartDTO cartDTO) {
-        Optional<Customer> customer = iCustomerRepository.findById(Token.decodeJWT(cartDTO.getUserToken()));
-        List<Book> selectedBooks = cartDTO.getBooks();
-        Optional<Book> book = iBookRepository.findById(cartDTO.getBookDTO().getBook().getId());
+        Customer customer = null;
+        if (cartDTO.getUserToken() != null) {
+            customer = iCustomerRepository.findById(Token.decodeJWT(cartDTO.getUserToken())).get();
+        }
+        List<CartItem> selectedBooks = cartDTO.getCartItems();
+        Book book = cartDTO.getBookDTO().getBook();
         int i = 0;
         while (i < selectedBooks.size()) {
-            if (selectedBooks.get(i).equals(book.get())) {
-                if (cartDTO.getBookDTO().getUserSelectedQuantity() == 0) {
-                    this.count -= selectedBooks.get(i).getQuantityInCart();
-                    selectedBooks.remove(selectedBooks.get(i));
-                } else if (cartDTO.getBookDTO().getUserSelectedQuantity() >= 1) {
-                    this.count = selectedBooks.get(i).getQuantityInCart();
-                    selectedBooks.get(i).setQuantityInCart(cartDTO.getBookDTO().getUserSelectedQuantity());
-                    this.count = selectedBooks.get(i).getQuantityInCart() - this.count;
-                }
+            if (selectedBooks.get(i).getBook().getId().equals(book.getId())) {
+                selectedBooks.get(i).setNoOfItems(cartDTO.getBookDTO().getUserSelectedQuantity());
                 break;
             }
             i++;
@@ -169,12 +142,14 @@ public class StoreService implements IBookStoreService {
 
     @Override
     public Cart removeFromCart(CartDTO cartDTO) {
-        Optional<Customer> customer = iCustomerRepository.findById(Token.decodeJWT(cartDTO.getUserToken()));
-        Optional<Book> book = iBookRepository.findById(cartDTO.getBookDTO().getBook().getId());
-        List<Book> selectedBooks = cartDTO.getBooks();
-        for (int i = 0; i < selectedBooks.size() ; i++) {
-            if (selectedBooks.get(i).getBookName().equals(book.get().getBookName())) {
-                this.count = selectedBooks.get(i).getQuantityInCart();
+        Customer customer = null;
+        if (cartDTO.getUserToken() != null) {
+            customer = iCustomerRepository.findById(Token.decodeJWT(cartDTO.getUserToken())).get();
+        }
+        Book book = cartDTO.getBookDTO().getBook();
+        List<CartItem> selectedBooks = cartDTO.getCartItems();
+        for (int i = 0; i < selectedBooks.size(); i++) {
+            if (selectedBooks.get(i).getBook().getId().equals(book.getId())) {
                 selectedBooks.remove(selectedBooks.get(i));
                 break;
             }
@@ -183,39 +158,24 @@ public class StoreService implements IBookStoreService {
     }
 
     @NotNull
-    private Cart getCart(CartDTO cartDTO, Optional<Customer> customer, List<Book> selectedBooks) {
+    private Cart getCart(CartDTO cartDTO, Customer customer, List<CartItem> selectedBooks) {
         Cart cart = new Cart();
-        cart.setNoOfItems(cartDTO.getNoOfItems() + this.count);
-        cart.setBooks(selectedBooks);
-        if (customer.isPresent()) {
-            if (customer.get().getUserCart() == null){
-                iCartRepository.save(cart);
-            }
-            customer.get().getUserCart().setNoOfItems(cart.getNoOfItems());
-            customer.get().getUserCart().setBooks(cart.getBooks());
-            iCustomerRepository.save(customer.get());
+        System.out.println(cartDTO.getNoOfItems());
+        cart.setNoOfItems(cartDTO.getNoOfItems());
+        cart.setCartItems(selectedBooks);
+        if (customer != null) {
+            customer.getUserCart().setNoOfItems(cart.getNoOfItems());
+            customer.getUserCart().setCartItems(cart.getCartItems());
+            iCustomerRepository.save(customer);
         }
         return cart;
     }
 
     @Override
-    public void beforeServerClosing() {
-        List<Book> booksTOSave = iBookRepository.findAll();
-        for (int i = 0; i < booksTOSave.size(); i++) {
-            booksTOSave.get(i).setInCart(false);
-        }
-        iBookRepository.saveAll(booksTOSave);
-        Optional<BookInDisplay> inDisplay = inDisplayRepository.findById(1);
-        inDisplay.get().setBook(null);
-        inDisplayRepository.save(inDisplay.get());
-    }
-
-    @Override
     public Book bookInDisplay(Book book) {
         Book bookToDisplay;
-        if(!inDisplayRepository.existsById(1)) {
+        if (inDisplayRepository.existsById(1)) {
             BookInDisplay inDisplay = new BookInDisplay();
-            inDisplay.setId(1);
             inDisplay.setBook(book);
             BookInDisplay saveDisplay = inDisplayRepository.save(inDisplay);
             bookToDisplay = saveDisplay.getBook();

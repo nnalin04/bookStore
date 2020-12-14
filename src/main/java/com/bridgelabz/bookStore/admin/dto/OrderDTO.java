@@ -1,21 +1,16 @@
 package com.bridgelabz.bookStore.admin.dto;
 
 import com.bridgelabz.bookStore.admin.model.Book;
-import com.bridgelabz.bookStore.admin.model.SelectedBook;
+import com.bridgelabz.bookStore.customer.modle.AddressDetail;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.OneToOne;
 
 @Getter
 @Setter
 public class OrderDTO {
     private Integer noOfItemsOrdered;
-    @OneToMany
-    private List<Book> bookList;
-    {
-        bookList = new ArrayList<>();
-    }
+    private AddressDetail deliveryAddress;
+    private Book book;
 }

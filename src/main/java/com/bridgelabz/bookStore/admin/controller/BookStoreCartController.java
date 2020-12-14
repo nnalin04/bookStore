@@ -4,6 +4,7 @@ import com.bridgelabz.bookStore.admin.dto.CartDTO;
 import com.bridgelabz.bookStore.admin.dto.Store;
 import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.admin.model.Cart;
+import com.bridgelabz.bookStore.admin.model.CartItem;
 import com.bridgelabz.bookStore.admin.service.IBookStoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,8 +35,8 @@ public class BookStoreCartController {
     }
 
     @PutMapping("/addToCart")
-    public ResponseEntity<List<Book>> addToCart(@RequestBody CartDTO cartDTO) {
-        List<Book> noOfItems = iBookStoreService.addToCart(cartDTO);
+    public ResponseEntity<List<CartItem>> addToCart(@RequestBody CartDTO cartDTO) {
+        List<CartItem> noOfItems = iBookStoreService.addToCart(cartDTO);
         return new ResponseEntity<>(noOfItems, HttpStatus.OK);
     }
 
@@ -61,10 +62,5 @@ public class BookStoreCartController {
     public ResponseEntity<Book> getBookToDisplay() {
         Book book = iBookStoreService.getBookToDisplay();
         return new ResponseEntity<>(book, HttpStatus.OK);
-    }
-
-    @PreDestroy
-    public void beforeServerClosing () {
-        iBookStoreService.beforeServerClosing();
     }
 }

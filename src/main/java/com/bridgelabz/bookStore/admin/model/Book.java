@@ -7,7 +7,6 @@ import lombok.ToString;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import java.util.Objects;
 
 @Entity
@@ -24,11 +23,7 @@ public class Book {
     private Integer price;
     @Column(length = 2048)
     private String bookDetail;
-    private boolean inCart = false;
-    private Integer quantityInCart;
-    private Integer quantityInStock;
-    @OneToOne
-    private SelectedBook selectedBook;
+    private boolean inCart;
 
     @Override
     public boolean equals(Object o) {
