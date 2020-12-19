@@ -3,6 +3,7 @@ package com.bridgelabz.bookStore.customer.service;
 import com.bridgelabz.bookStore.admin.model.Cart;
 import com.bridgelabz.bookStore.admin.model.CartItem;
 import com.bridgelabz.bookStore.admin.model.Orders;
+import com.bridgelabz.bookStore.admin.model.WishList;
 import com.bridgelabz.bookStore.admin.repository.*;
 import com.bridgelabz.bookStore.customer.dto.*;
 import com.bridgelabz.bookStore.customer.modle.*;
@@ -41,6 +42,9 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
     ICartItemRepository iCartItemRepository;
 
     @Autowired
+    IWishListRepository iWishListRepository;
+
+    @Autowired
     MailService mail;
 
     @Override
@@ -62,6 +66,7 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
     private Customer addCart(Customer customer) {
         customer.setUserCart(iCartRepository.save(new Cart()));
         customer.setMyOrders(iOrdersRepository.save(new Orders()));
+        customer.setMyWishList(iWishListRepository.save(new WishList()));
         return customer;
     }
 
@@ -91,6 +96,7 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
                     customerDTO.setAddressDetail(customer.get().getAddressDetail());
                     System.out.println(userDTO.getCartItemList().size());
                     customerDTO.setUserCart(this.setUserCart(customer.get(), userDTO.getCartItemList()));
+                    customerDTO.setWishList(customer.get().getMyWishList());
                     customerDTO.setMyOrders(customer.get().getMyOrders());
                     return customerDTO;
                 }
@@ -154,6 +160,7 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
             customer.get().setEmail(userDTO.getEmail());
             customer.get().setMobileNo(userDTO.getMobileNo());
             customer.get().setPassword(userDTO.getPassword());
+            customer.get().setImage(userDTO.getImage());
             return iCustomerRepository.save(customer.get());
         }
         throw new BookStoreException("Login session time out");
@@ -203,3 +210,5 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
         return customer.get().getUserCart().getCartItems();
     }
 }
+
+

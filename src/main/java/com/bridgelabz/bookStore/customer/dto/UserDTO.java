@@ -4,6 +4,7 @@ import com.bridgelabz.bookStore.admin.model.CartItem;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
 import java.util.List;
 
 @Getter
@@ -13,5 +14,6 @@ public class UserDTO {
     private String email;
     private String mobileNo;
     private String password;
+    private File image;
     private List<CartItem> cartItemList;
 }

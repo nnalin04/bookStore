@@ -2,11 +2,13 @@ package com.bridgelabz.bookStore.customer.modle;
 
 import com.bridgelabz.bookStore.admin.model.Cart;
 import com.bridgelabz.bookStore.admin.model.Orders;
+import com.bridgelabz.bookStore.admin.model.WishList;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Pattern;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,12 +37,15 @@ public class Customer {
     @Pattern(regexp="^(?=.*[A-Z].*)(?=.*[0-9].*)(?=.*[!@#$%^&*+].*)[0-9a-zA-Z!@#$%^&*+]{8,}$",
             message="the password must be 8 character and contain an upperCase, lowerCase, specialCharacter & number")
     private String password;
-
+    private File image;
     @OneToMany
     private List<AddressDetail> addressDetail;
 
     @OneToOne
     private Orders myOrders;
+
+    @OneToOne
+    private WishList myWishList;
 
     {
         addressDetail = new ArrayList<>();

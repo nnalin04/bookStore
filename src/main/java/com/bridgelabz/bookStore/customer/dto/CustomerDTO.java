@@ -2,13 +2,11 @@ package com.bridgelabz.bookStore.customer.dto;
 
 import com.bridgelabz.bookStore.admin.model.Cart;
 import com.bridgelabz.bookStore.admin.model.Orders;
+import com.bridgelabz.bookStore.admin.model.WishList;
 import com.bridgelabz.bookStore.customer.modle.AddressDetail;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +21,7 @@ public class CustomerDTO {
     private String mobileNo;
     private List<AddressDetail> addressDetail;
     private Orders myOrders;
+    private WishList wishList;
     {
         addressDetail = new ArrayList<>();
     }

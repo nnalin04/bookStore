@@ -13,17 +13,13 @@ import com.bridgelabz.bookStore.admin.repository.ICartRepository;
 import com.bridgelabz.bookStore.admin.repository.IOrdersRepository;
 import com.bridgelabz.bookStore.utility.MailService;
 import com.bridgelabz.bookStore.utility.Token;
-import org.hibernate.boot.model.source.spi.Orderable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
-public class OrderedService implements IOrderedService{
+public class    OrderedService implements IOrderedService{
 
     @Autowired
     private ICustomerRepository iCustomerRepository;
@@ -69,8 +65,7 @@ public class OrderedService implements IOrderedService{
             orderedBook.setQuantityForOrder(orderDTO.getNoOfItemsOrdered());
             Formatter fmt = new Formatter();
             Calendar cal = Calendar.getInstance();
-            fmt = new Formatter();
-            fmt.format("%tB %tm", cal, cal);
+            fmt.format("%tB %td", cal, cal);
             orderedBook.setOrderedDate(fmt+"");
             orderedBook.setDeliveryAddress(iAddressRepository.save(orderDTO.getDeliveryAddress()));
             orderedBook.setBook(orderDTO.getBook());
@@ -79,20 +74,36 @@ public class OrderedService implements IOrderedService{
             customer.get().getMyOrders().setOrderedBook(bookList);
             iCustomerRepository.save(customer.get());
             mail.sendSimpleMessage(customer.get().getEmail(), "Book Store Order Status",
-                    "Order was successfully Placed on "+ orderedBook.getDeliveredDate()+"");
-            return this.removeOrderedFromCart(customer.get(), orderDTO.getBook());
+                    "Hi \n" +
+                            customer.get().getFullName() +"\n"+
+                            "Your Order was successfully Placed on "+ orderedBook.getOrderedDate()+"\n" +
+                            "\n"+
+                            "Book name :- "+orderDTO.getBook().getBookName()+"\n" +
+                            "By :- "+orderDTO.getBook().getAuthorName()+"\n" +
+                            "price :- "+orderDTO.getBook().getPrice()+"\n" +
+                            "Quantity ordered :- " +orderDTO.getNoOfItemsOrdered()+"\n"+
+                            "Total price :- "+orderDTO.getBook().getPrice() * orderDTO.getNoOfItemsOrdered()+"\n\n" +
+                            "for further contact \n" +
+                            "email :- abcd@xyz.com\n" +
+                            "ph :- 9876543210");
+            return this.removeOrderedFromCart(customer.get(), orderDTO);
         }
         throw new BookStoreException("Login to checkout your orders");
     }
 
-    private Cart removeOrderedFromCart(Customer customer, Book book) {
+    private Cart removeOrderedFromCart(Customer customer, OrderDTO book) {
+        List<CartItem> items = new ArrayList<>();
         List<CartItem> books = customer.getUserCart().getCartItems();
         for (int i = 0; i < books.size(); i++ ) {
-            if (books.get(i).getBook().equals(book)) {
-                books.remove(books.get(i));
+            if (books.get(i).getBook().getId().equals(book.getBook().getId())) {
+                book.getBook().setQuantityInStock(
+                        book.getBook().getQuantityInStock() - book.getNoOfItemsOrdered());
+                iBookRepository.save(book.getBook());
+            } else {
+                items.add(books.get(i));
             }
         }
-        customer.getUserCart().setCartItems(books);
+        customer.getUserCart().setCartItems(items);
         return iCustomerRepository.save(customer).getUserCart();
     }
 
@@ -105,13 +116,12 @@ public class OrderedService implements IOrderedService{
             if (selectedBook.equals(bookDTO.getBook())) {
                 Formatter fmt = new Formatter();
                 Calendar cal = Calendar.getInstance();
-                fmt = new Formatter();
                 fmt.format("%tB %tm", cal, cal);
                 selectedBook.setDeliveredDate(fmt+"");
             }
             iOrderedBookRepository.save(selectedBook);
             mail.sendSimpleMessage(customer.get().getEmail(), "Book Store Delivery Status",
-                    "Order was successfully delivered on "+ selectedBook.getDeliveredDate()+"");
+                    "Order was successfully delivered on "+ selectedBook.getDeliveredDate()+".");
             return "Order was successfully delivered";
         }
         throw new BookStoreException("Book will not be able to delivered due to some service problem payment" +

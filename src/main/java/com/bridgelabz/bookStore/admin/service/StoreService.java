@@ -1,14 +1,14 @@
 package com.bridgelabz.bookStore.admin.service;
 
+import com.bridgelabz.bookStore.admin.dto.CartDTO;
 import com.bridgelabz.bookStore.admin.dto.Store;
-import com.bridgelabz.bookStore.admin.model.BookInDisplay;
-import com.bridgelabz.bookStore.admin.model.CartItem;
+import com.bridgelabz.bookStore.admin.dto.BookListDTO;
+import com.bridgelabz.bookStore.admin.dto.WishListDTO;
+import com.bridgelabz.bookStore.admin.model.*;
 import com.bridgelabz.bookStore.admin.repository.*;
 import com.bridgelabz.bookStore.customer.modle.Customer;
-import com.bridgelabz.bookStore.customer.repository.*;
-import com.bridgelabz.bookStore.admin.dto.CartDTO;
-import com.bridgelabz.bookStore.admin.model.Book;
-import com.bridgelabz.bookStore.admin.model.Cart;
+import com.bridgelabz.bookStore.customer.repository.IAddressRepository;
+import com.bridgelabz.bookStore.customer.repository.ICustomerRepository;
 import com.bridgelabz.bookStore.utility.CSVReader;
 import com.bridgelabz.bookStore.utility.MailService;
 import com.bridgelabz.bookStore.utility.Token;
@@ -16,9 +16,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StoreService implements IBookStoreService {
@@ -45,27 +48,50 @@ public class StoreService implements IBookStoreService {
     IBookInDisplayRepository inDisplayRepository;
 
     @Autowired
+    IWishListRepository iWishListRepository;
+
+//    @Autowired
+//    IElasticBookRepository iElasticBookRepository;
+
+    @Autowired
+    ElasticSearchService eService;
+
+    @Autowired
     MailService mail;
 
     private Boolean inCart = false;
-
-    int count = 0;
 
     private List<Book> books;
 
     @Override
     public void createBookStore() {
         this.books = new CSVReader().loadCensusData();
-        this.books.forEach(book -> iBookRepository.save(book));
+        this.books.forEach(book -> {
+            book.setQuantityInStock(2);
+            book.setInCart(false);
+            book.setInWishList(false);
+            iBookRepository.save(book);
+            try {
+                eService.addNewBook(book);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 
     @Override
-    public Store getBooks(Integer currentPage) {
-        this.books = this.iBookRepository.findAll();
+    public Store getBooks(BookListDTO bookListDTO) {
+        if ( bookListDTO.getSearchQuarry() != null && bookListDTO.getSearchQuarry().length() > 0){
+            this.books = this.findBooksBySearch(bookListDTO.getSearchQuarry());
+        } else {
+            this.books = this.iBookRepository.findAll();
+        }
         List<List<Book>> bookList = new ArrayList<>();
+        List<Book> books = this.sortBookStore(bookListDTO.getSortingMethod());
         List<Book> innerBook = new ArrayList<>();
         int count = 0;
-        for (Book book : this.books) {
+        for (Book book : books) {
             if (count == 8) {
                 bookList.add(innerBook);
                 innerBook = new ArrayList<>();
@@ -74,11 +100,112 @@ public class StoreService implements IBookStoreService {
             count++;
             innerBook.add(book);
         }
+        if (count > 0) {
+            bookList.add(innerBook);
+        }
         Store store = new Store();
-        store.setTotalBooks(this.books.size());
-        store.setNoOfPage(bookList.size());
-        store.setBooks(bookList.get(currentPage - 1));
+        store.setTotalBooks(books.size());
+        store.setNoOfPage(bookList.size());;
+        store.setBooks(bookList.get(bookListDTO.getPageNo() - 1));
         return store;
+    }
+
+    private List<Book> sortBookStore(String sortingData) {
+        Comparator<Book> comparator;
+        if (sortingData == null) sortingData = "";
+
+        switch (sortingData) {
+            case "HighToLow" :
+                comparator = Comparator.comparing(Book::getPrice).reversed();
+                break;
+            case "LowToHigh" :
+                comparator = Comparator.comparing(Book::getPrice);
+                break;
+            case "NewestArrivals" :
+                comparator = Comparator.comparing(Book::getId).reversed();
+                break;
+            default:
+                comparator = Comparator.comparing(Book::getId);
+                break;
+        }
+
+        return this.books.stream()
+                .sorted(comparator).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Book> findBooksBySearch(String name) {
+        List<Book> books = eService.searchData(name);
+        return books;
+    }
+
+    @Override
+    public List<Book> addBookToWishList(WishListDTO wishListDTO) {
+        List<Book> dtoBooks;
+        if (wishListDTO.getBooks() != null)
+            dtoBooks = wishListDTO.getBooks();
+        else dtoBooks = new ArrayList<>();
+        Optional<Book> book = iBookRepository.findById(wishListDTO.getBook().getId());
+        book.get().setInWishList(true);
+        if (wishListDTO.getToken() != null) {
+
+            Optional<Customer> customer = iCustomerRepository.findById(Token
+                    .decodeJWT(wishListDTO.getToken()));
+
+            if (customer.isPresent()) {
+
+                if (customer.get().getMyWishList().getBooks().size() == 0) {                    ;
+                    customer.get().getMyWishList().getBooks().add(book.get());
+                }
+
+                List<Book> books = customer.get().getMyWishList().getBooks();
+                books.stream().map(currentBook -> {
+                    if (currentBook.getId().equals(book.get().getId()) ) {
+                        books.remove(currentBook);
+                    }
+                    return currentBook;
+                });
+                books.add(book.get());
+                customer.get().getMyWishList().setBooks(books);
+                dtoBooks = iCustomerRepository.save(customer.get()).getMyWishList().getBooks();
+            }
+        } else {
+            dtoBooks.add(book.get());
+        }
+        return dtoBooks;
+    }
+
+    @Override
+    public List<Book> deleteBookToWishList(WishListDTO wishListDTO) {
+        boolean inList = false;
+        Book bookToAdd = null;
+        List<Book> books = wishListDTO.getBooks();
+        books.remove(wishListDTO.getBook());
+
+        iBookRepository.save(wishListDTO.getBook());
+        if (wishListDTO.getToken() != null && wishListDTO.getToken().length() > 0) {
+            Optional<Customer> customer = iCustomerRepository.findById(Token
+                    .decodeJWT(wishListDTO.getToken()));
+            List<Book> booksList = customer.get().getMyWishList().getBooks();
+            for (Book book : booksList) {
+                inList = false;
+                for (Book dtoBook : books) {
+                    bookToAdd = dtoBook;
+                    if (book.getId().equals(dtoBook.getId()))
+                        inList = true;
+                }
+                if (!inList) {
+                    booksList.add(bookToAdd);
+                }
+                if (book.getId().equals(wishListDTO.getBook().getId())){
+                    booksList.remove(book);
+                }
+            }
+            customer.get().getMyWishList().setBooks(booksList);
+            books = iCustomerRepository.save(customer.get()).getMyWishList().getBooks();
+
+        }
+        return books;
     }
 
     @Override
@@ -105,7 +232,7 @@ public class StoreService implements IBookStoreService {
 
                 List<CartItem> books = customer.get().getUserCart().getCartItems();
                 books.stream().map(currentBook -> {
-                    if (currentBook.getBook().getId().equals(book.get().getId())) {
+                    if (currentBook.getBook().getId().equals(book.get().getId()) ) {
                         books.remove(currentBook);
                     }
                     return currentBook;
@@ -130,7 +257,11 @@ public class StoreService implements IBookStoreService {
         Book book = cartDTO.getBookDTO().getBook();
         int i = 0;
         while (i < selectedBooks.size()) {
-            if (selectedBooks.get(i).getBook().getId().equals(book.getId())) {
+            if (selectedBooks.get(i).getBook().getId().equals(book.getId())
+                    && cartDTO.getBookDTO().getUserSelectedQuantity() <= book.getQuantityInStock()) {
+                selectedBooks.get(i).getBook().setQuantityInStock
+                        (selectedBooks.get(i).getBook().getQuantityInStock()
+                      - cartDTO.getBookDTO().getUserSelectedQuantity());
                 selectedBooks.get(i).setNoOfItems(cartDTO.getBookDTO().getUserSelectedQuantity());
                 break;
             }
@@ -174,8 +305,9 @@ public class StoreService implements IBookStoreService {
     @Override
     public Book bookInDisplay(Book book) {
         Book bookToDisplay;
-        if (inDisplayRepository.existsById(1)) {
+        if (!inDisplayRepository.existsById(1)) {
             BookInDisplay inDisplay = new BookInDisplay();
+            inDisplay.setId(1);
             inDisplay.setBook(book);
             BookInDisplay saveDisplay = inDisplayRepository.save(inDisplay);
             bookToDisplay = saveDisplay.getBook();

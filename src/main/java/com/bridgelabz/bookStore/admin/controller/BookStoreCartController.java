@@ -2,6 +2,8 @@ package com.bridgelabz.bookStore.admin.controller;
 
 import com.bridgelabz.bookStore.admin.dto.CartDTO;
 import com.bridgelabz.bookStore.admin.dto.Store;
+import com.bridgelabz.bookStore.admin.dto.BookListDTO;
+import com.bridgelabz.bookStore.admin.dto.WishListDTO;
 import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.admin.model.Cart;
 import com.bridgelabz.bookStore.admin.model.CartItem;
@@ -12,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.List;
 
 @CrossOrigin("*")
@@ -28,9 +29,9 @@ public class BookStoreCartController {
         iBookStoreService.createBookStore();
     }
 
-    @GetMapping("/getStore/{currentPage}")
-    public ResponseEntity<Store> getBookStore(@PathVariable Integer currentPage){
-        Store books = iBookStoreService.getBooks(currentPage);
+    @PutMapping("/getStore")
+    public ResponseEntity<Store> getBookStore(@RequestBody BookListDTO bookListDTO){
+        Store books = iBookStoreService.getBooks(bookListDTO);
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
@@ -62,5 +63,23 @@ public class BookStoreCartController {
     public ResponseEntity<Book> getBookToDisplay() {
         Book book = iBookStoreService.getBookToDisplay();
         return new ResponseEntity<>(book, HttpStatus.OK);
+    }
+
+    @GetMapping("/findsBooks/{name}")
+    public ResponseEntity<List<Book>> findBooksBySearch(@PathVariable String name) {
+        List<Book> books = iBookStoreService.findBooksBySearch(name);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
+
+    @PostMapping("/addBookToWishList")
+    public ResponseEntity<List<Book>> addBookToWishList(@RequestBody WishListDTO wishListDTO) {
+        List<Book> books = iBookStoreService.addBookToWishList(wishListDTO);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
+
+    @PutMapping("/deleteBookToWishList")
+    public ResponseEntity<List<Book>> deleteBookToWishList(@RequestBody WishListDTO wishListDTO) {
+        List<Book> books = iBookStoreService.deleteBookToWishList(wishListDTO);
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 }
