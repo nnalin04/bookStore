@@ -14,7 +14,6 @@ import java.util.Objects;
 @Setter
 @ToString
 public class Book {
-
     @Id
     private Integer id;
     private String bookName;
@@ -24,6 +23,8 @@ public class Book {
     @Column(length = 2048)
     private String bookDetail;
     private boolean inCart;
+    private boolean inWishList;
+    private Integer quantityInStock;
 
     @Override
     public boolean equals(Object o) {
