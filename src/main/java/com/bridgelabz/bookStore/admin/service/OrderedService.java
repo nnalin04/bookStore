@@ -1,5 +1,6 @@
 package com.bridgelabz.bookStore.admin.service;
 
+import com.bridgelabz.bookStore.admin.dto.ReturnOrder;
 import com.bridgelabz.bookStore.admin.model.*;
 import com.bridgelabz.bookStore.admin.repository.IOrderedBookRepository;
 import com.bridgelabz.bookStore.customer.modle.Customer;
@@ -52,8 +53,9 @@ public class    OrderedService implements IOrderedService{
     }
 
     @Override
-    public Cart checkOut(String userToken, OrderDTO orderDTO) {
+    public ReturnOrder checkOut(String userToken, OrderDTO orderDTO) {
         Optional<Customer> customer = iCustomerRepository.findById(Token.decodeJWT(userToken));
+        ReturnOrder returnOrder = new ReturnOrder();
         if (customer.isPresent()) {
             if (customer.get().getMyOrders() == null) {
                 customer.get().setMyOrders(new Orders());
@@ -69,7 +71,7 @@ public class    OrderedService implements IOrderedService{
             orderedBook.setOrderedDate(fmt+"");
             orderedBook.setDeliveryAddress(iAddressRepository.save(orderDTO.getDeliveryAddress()));
             orderedBook.setBook(orderDTO.getBook());
-            iOrderedBookRepository.save(orderedBook);
+            returnOrder.setOrderedBook(iOrderedBookRepository.save(orderedBook));
             bookList.add(orderedBook);
             customer.get().getMyOrders().setOrderedBook(bookList);
             iCustomerRepository.save(customer.get());
@@ -77,16 +79,19 @@ public class    OrderedService implements IOrderedService{
                     "Hi \n" +
                             customer.get().getFullName() +"\n"+
                             "Your Order was successfully Placed on "+ orderedBook.getOrderedDate()+"\n" +
-                            "\n"+
+                            "\n" +
+                            "Book Detail : \n"+
                             "Book name :- "+orderDTO.getBook().getBookName()+"\n" +
-                            "By :- "+orderDTO.getBook().getAuthorName()+"\n" +
+                            "Author name :- "+orderDTO.getBook().getAuthorName()+"\n" +
                             "price :- "+orderDTO.getBook().getPrice()+"\n" +
                             "Quantity ordered :- " +orderDTO.getNoOfItemsOrdered()+"\n"+
-                            "Total price :- "+orderDTO.getBook().getPrice() * orderDTO.getNoOfItemsOrdered()+"\n\n" +
+                            "Total price :- "+orderDTO.getBook().getPrice() * orderDTO.getNoOfItemsOrdered()+"\n" +
+                            "\n" +
                             "for further contact \n" +
                             "email :- abcd@xyz.com\n" +
                             "ph :- 9876543210");
-            return this.removeOrderedFromCart(customer.get(), orderDTO);
+            returnOrder.setCart(this.removeOrderedFromCart(customer.get(), orderDTO));
+            return returnOrder;
         }
         throw new BookStoreException("Login to checkout your orders");
     }
