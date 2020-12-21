@@ -1,5 +1,6 @@
 package com.bridgelabz.bookStore.customer.dto;
 
+import com.bridgelabz.bookStore.admin.model.Book;
 import com.bridgelabz.bookStore.admin.model.CartItem;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,4 +17,5 @@ public class UserDTO {
     private String password;
     private File image;
     private List<CartItem> cartItemList;
+    private List<Book> booksInWishList;
 }

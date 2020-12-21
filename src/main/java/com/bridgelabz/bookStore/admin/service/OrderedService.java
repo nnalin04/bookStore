@@ -76,7 +76,7 @@ public class    OrderedService implements IOrderedService{
             customer.get().getMyOrders().setOrderedBook(bookList);
             iCustomerRepository.save(customer.get());
             mail.sendSimpleMessage(customer.get().getEmail(), "Book Store Order Status",
-                    "Hi \n" +
+                    "Hi, \n" +
                             customer.get().getFullName() +"\n"+
                             "Your Order was successfully Placed on "+ orderedBook.getOrderedDate()+"\n" +
                             "\n" +
@@ -118,7 +118,7 @@ public class    OrderedService implements IOrderedService{
         List<OrderedBook> bookList = customer.get().getMyOrders().getOrderedBook();
         for (int i = 0; i < bookList.size(); i++) {
             OrderedBook selectedBook = bookList.get(i);
-            if (selectedBook.equals(bookDTO.getBook())) {
+            if (selectedBook.getBook().equals(bookDTO.getBook())) {
                 Formatter fmt = new Formatter();
                 Calendar cal = Calendar.getInstance();
                 fmt.format("%tB %tm", cal, cal);

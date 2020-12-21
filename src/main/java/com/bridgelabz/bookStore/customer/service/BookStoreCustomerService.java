@@ -1,9 +1,6 @@
 package com.bridgelabz.bookStore.customer.service;
 
-import com.bridgelabz.bookStore.admin.model.Cart;
-import com.bridgelabz.bookStore.admin.model.CartItem;
-import com.bridgelabz.bookStore.admin.model.Orders;
-import com.bridgelabz.bookStore.admin.model.WishList;
+import com.bridgelabz.bookStore.admin.model.*;
 import com.bridgelabz.bookStore.admin.repository.*;
 import com.bridgelabz.bookStore.customer.dto.*;
 import com.bridgelabz.bookStore.customer.modle.*;
@@ -57,17 +54,16 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
         customer.setMobileNo(userDTO.getMobileNo());
         customer.setPassword(userDTO.getPassword());
         customer.setVerified(false);
-        customer = this.addCart(customer);
-        Customer user = iCustomerRepository.save(customer);
+        Customer user = this.addBookStoreFunction(customer);
         mail.sendCustomerMailWithTokenURL(userDTO.getEmail(), Token.getToken(user.getId()));
         return "Successfully Registered";
     }
 
-    private Customer addCart(Customer customer) {
+    private Customer addBookStoreFunction(Customer customer) {
         customer.setUserCart(iCartRepository.save(new Cart()));
         customer.setMyOrders(iOrdersRepository.save(new Orders()));
         customer.setMyWishList(iWishListRepository.save(new WishList()));
-        return customer;
+        return iCustomerRepository.save(customer);
     }
 
     @Override
@@ -76,8 +72,7 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
         if (customer.isPresent()) {
             customer.get().setVerified(true);
             iCustomerRepository.save(customer.get());
-            return "Your emailId is verified please click on the following given link \n" +
-                    "<link>http://localhost:3000/login</link>";
+            return "Your emailId is verified you can login now";
         }
         throw new BookStoreException("Please Please re-register for verification");
     }
@@ -96,7 +91,7 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
                     customerDTO.setAddressDetail(customer.get().getAddressDetail());
                     System.out.println(userDTO.getCartItemList().size());
                     customerDTO.setUserCart(this.setUserCart(customer.get(), userDTO.getCartItemList()));
-                    customerDTO.setWishList(customer.get().getMyWishList());
+                    customerDTO.setWishList(this.setUserWishList(customer.get(), userDTO.getBooksInWishList()));
                     customerDTO.setMyOrders(customer.get().getMyOrders());
                     return customerDTO;
                 }
@@ -106,23 +101,47 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
         throw new BookStoreException("This email not registered");
     }
 
+    private WishList setUserWishList(Customer customer, List<Book> books) {
+        boolean inWishList;
+        WishList wishList = new WishList();
+        List<Book> booksInUserWishList = customer.getMyWishList().getBooks();
+        if (booksInUserWishList.size() == 0) {
+            wishList.setBooks(books);
+        } else {
+            for (Book book : books) {
+                inWishList = false;
+                for (Book value : booksInUserWishList) {
+                    if (value.getId().equals(book.getId())) {
+                        inWishList = true;
+                        break;
+                    }
+                }
+                if (!inWishList)
+                    booksInUserWishList.add(book);
+            }
+            wishList.setBooks(booksInUserWishList);
+        }
+        customer.setMyWishList(iWishListRepository.save(wishList));
+        iCustomerRepository.save(customer);
+        return customer.getMyWishList();
+    }
+
     private Cart setUserCart(Customer customer, List<CartItem> userCart) {
         boolean inUserCart;
         List<CartItem> cartItems = customer.getUserCart().getCartItems();
-        List<CartItem> items = userCart;
         if (cartItems.size() == 0) {
-            cartItems = iCartItemRepository.saveAll(items);
+            cartItems = iCartItemRepository.saveAll(userCart);
         } else {
-            for (int i = 0; i < items.size(); i++) {
+            for (CartItem item : userCart) {
                 inUserCart = false;
                 for (int j = 0; j < cartItems.size(); j++) {
-                    if (cartItems.get(j).getBook().getId().equals(items.get(i).getBook().getId())) {
-                        cartItems.get(j).setNoOfItems(items.get(i).getNoOfItems());
+                    if (cartItems.get(j).getBook().getId().equals(item.getBook().getId())) {
+                        cartItems.get(j).setNoOfItems(item.getNoOfItems());
                         inUserCart = true;
                     }
                 }
                 if (!inUserCart)
-                    cartItems.add(items.get(i));
+                    cartItems.add(item);
             }
             cartItems = iCartItemRepository.saveAll(cartItems);
         }
