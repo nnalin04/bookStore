@@ -10,6 +10,8 @@ import com.bridgelabz.bookStore.utility.MailService;
 import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +44,9 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
     IWishListRepository iWishListRepository;
 
     @Autowired
+    private TemplateEngine templateEngine;
+
+    @Autowired
     MailService mail;
 
     @Override
@@ -72,7 +77,8 @@ public class BookStoreCustomerService implements IBookStoreCustomerService {
         if (customer.isPresent()) {
             customer.get().setVerified(true);
             iCustomerRepository.save(customer.get());
-            return "Your emailId is verified you can login now";
+            Context context = new Context();
+            return templateEngine.process("Verification", context);
         }
         throw new BookStoreException("Please Please re-register for verification");
     }

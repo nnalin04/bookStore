@@ -6,6 +6,8 @@ import com.bridgelabz.bookStore.customer.dto.UserDTO;
 import com.bridgelabz.bookStore.admin.dto.BookDTO;
 import com.bridgelabz.bookStore.seller.model.Seller;
 
+import javax.mail.MessagingException;
+
 public interface IBookStoreSeller {
     String registerUser(UserDTO userDTO);
 
@@ -23,7 +25,7 @@ public interface IBookStoreSeller {
 
     Seller editAddress(String userToken, AddressDTO addressDTO);
 
-    String sendBookTOAdmin(String userToken, BookDTO bookDTO);
+    String sendBookTOAdmin(String userToken, BookDTO bookDTO) throws MessagingException;
 
     String rejectedBook(String userToken, BookDTO bookDTO);
 

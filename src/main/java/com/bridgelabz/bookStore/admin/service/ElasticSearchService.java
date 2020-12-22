@@ -44,7 +44,7 @@ public class ElasticSearchService {
     public List<Book> searchData(String query) {
         SearchRequest searchRequest = new SearchRequest(INDEX).types(TYPE);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.queryStringQuery("*" + query + "*")
+        QueryBuilder queryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.queryStringQuery(query)
                 .analyzeWildcard(true).field("bookName").field("authorName"));
         searchSourceBuilder.query(queryBuilder);
         searchRequest.source(searchSourceBuilder);

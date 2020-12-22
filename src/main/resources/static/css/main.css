@@ -1,0 +1,31 @@
+.emailBody {
+    text-align: left;
+}
+
+.emailHeading {
+    padding-bottom: 15px;
+}
+
+.headingContent {
+    font-size: larger;
+    line-height: 5px;
+    font-family: Roboto,sans-serif;
+}
+
+.orderedPlaced {
+    font-size: medium;
+    line-height: 10px;
+    padding-bottom: 15px;
+    font-family: Roboto,sans-serif;
+}
+
+.emailOrderedDetail {
+    font-size: medium;
+    line-height: 0;
+    font-family: Roboto,sans-serif;
+}
+
+.listBody {
+    padding-top: 10px;
+    padding-bottom: 15px;
+}

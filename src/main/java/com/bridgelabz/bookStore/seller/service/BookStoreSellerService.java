@@ -23,6 +23,7 @@ import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.util.List;
 import java.util.Optional;
 
@@ -169,7 +170,7 @@ public class BookStoreSellerService implements IBookStoreSeller {
     }
 
     @Override
-    public String sendBookTOAdmin(String userToken, BookDTO bookDTO) {
+    public String sendBookTOAdmin(String userToken, BookDTO bookDTO) throws MessagingException {
         Optional<Seller> seller = iSellerRepository.findById(Token.decodeJWT(userToken));
         NewAddedBook newAddedBook = new NewAddedBook();
         newAddedBook.setBook(bookDTO.getBook());

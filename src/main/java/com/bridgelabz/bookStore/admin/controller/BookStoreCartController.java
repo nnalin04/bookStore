@@ -18,7 +18,7 @@ import java.util.List;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping(path = "/bookstoreCart")
+@RequestMapping(path = "/bookstoreStoreService")
 public class BookStoreCartController {
 
     @Autowired

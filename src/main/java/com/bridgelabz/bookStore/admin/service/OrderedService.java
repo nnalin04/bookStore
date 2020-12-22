@@ -1,22 +1,28 @@
 package com.bridgelabz.bookStore.admin.service;
 
+import com.bridgelabz.bookStore.admin.dto.BookDTO;
+import com.bridgelabz.bookStore.admin.dto.OrderDTO;
 import com.bridgelabz.bookStore.admin.dto.ReturnOrder;
-import com.bridgelabz.bookStore.admin.model.*;
+import com.bridgelabz.bookStore.admin.model.Cart;
+import com.bridgelabz.bookStore.admin.model.CartItem;
+import com.bridgelabz.bookStore.admin.model.OrderedBook;
+import com.bridgelabz.bookStore.admin.model.Orders;
+import com.bridgelabz.bookStore.admin.repository.IBookRepository;
+import com.bridgelabz.bookStore.admin.repository.ICartRepository;
 import com.bridgelabz.bookStore.admin.repository.IOrderedBookRepository;
+import com.bridgelabz.bookStore.admin.repository.IOrdersRepository;
 import com.bridgelabz.bookStore.customer.modle.Customer;
 import com.bridgelabz.bookStore.customer.repository.IAddressRepository;
 import com.bridgelabz.bookStore.customer.repository.ICustomerRepository;
-import com.bridgelabz.bookStore.admin.dto.BookDTO;
-import com.bridgelabz.bookStore.admin.dto.OrderDTO;
 import com.bridgelabz.bookStore.exception.BookStoreException;
-import com.bridgelabz.bookStore.admin.repository.IBookRepository;
-import com.bridgelabz.bookStore.admin.repository.ICartRepository;
-import com.bridgelabz.bookStore.admin.repository.IOrdersRepository;
 import com.bridgelabz.bookStore.utility.MailService;
 import com.bridgelabz.bookStore.utility.Token;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import javax.mail.MessagingException;
 import java.util.*;
 
 @Service
@@ -41,6 +47,9 @@ public class    OrderedService implements IOrderedService{
     private IOrdersRepository iOrdersRepository;
 
     @Autowired
+    private TemplateEngine templateEngine;
+
+    @Autowired
     MailService mail;
 
     @Override
@@ -53,7 +62,7 @@ public class    OrderedService implements IOrderedService{
     }
 
     @Override
-    public ReturnOrder checkOut(String userToken, OrderDTO orderDTO) {
+    public ReturnOrder checkOut(String userToken, OrderDTO orderDTO) throws MessagingException {
         Optional<Customer> customer = iCustomerRepository.findById(Token.decodeJWT(userToken));
         ReturnOrder returnOrder = new ReturnOrder();
         if (customer.isPresent()) {
@@ -71,25 +80,12 @@ public class    OrderedService implements IOrderedService{
             orderedBook.setOrderedDate(fmt+"");
             orderedBook.setDeliveryAddress(iAddressRepository.save(orderDTO.getDeliveryAddress()));
             orderedBook.setBook(orderDTO.getBook());
-            returnOrder.setOrderedBook(iOrderedBookRepository.save(orderedBook));
-            bookList.add(orderedBook);
+            OrderedBook savedOrderedBook = iOrderedBookRepository.save(orderedBook);
+            returnOrder.setOrderedBook(savedOrderedBook);
+            bookList.add(savedOrderedBook);
             customer.get().getMyOrders().setOrderedBook(bookList);
             iCustomerRepository.save(customer.get());
-            mail.sendSimpleMessage(customer.get().getEmail(), "Book Store Order Status",
-                    "Hi, \n" +
-                            customer.get().getFullName() +"\n"+
-                            "Your Order was successfully Placed on "+ orderedBook.getOrderedDate()+"\n" +
-                            "\n" +
-                            "Book Detail : \n"+
-                            "Book name :- "+orderDTO.getBook().getBookName()+"\n" +
-                            "Author name :- "+orderDTO.getBook().getAuthorName()+"\n" +
-                            "price :- "+orderDTO.getBook().getPrice()+"\n" +
-                            "Quantity ordered :- " +orderDTO.getNoOfItemsOrdered()+"\n"+
-                            "Total price :- "+orderDTO.getBook().getPrice() * orderDTO.getNoOfItemsOrdered()+"\n" +
-                            "\n" +
-                            "for further contact \n" +
-                            "email :- abcd@xyz.com\n" +
-                            "ph :- 9876543210");
+            mail.sendSimpleMessage(customer.get().getEmail(),"Book Store Order Status", this.messageBody(orderDTO, savedOrderedBook, customer));
             returnOrder.setCart(this.removeOrderedFromCart(customer.get(), orderDTO));
             return returnOrder;
         }
@@ -113,7 +109,7 @@ public class    OrderedService implements IOrderedService{
     }
 
     @Override
-    public String orderDelivery(String userToken, BookDTO bookDTO) {
+    public String orderDelivery(String userToken, BookDTO bookDTO) throws MessagingException {
         Optional<Customer> customer = iCustomerRepository.findById(Token.decodeJWT(userToken));
         List<OrderedBook> bookList = customer.get().getMyOrders().getOrderedBook();
         for (int i = 0; i < bookList.size(); i++) {
@@ -131,6 +127,15 @@ public class    OrderedService implements IOrderedService{
         }
         throw new BookStoreException("Book will not be able to delivered due to some service problem payment" +
                 " will be returned in 2 to 3 working days");
+    }
+
+    public String messageBody(OrderDTO orderDTO, OrderedBook savedOrderedBook, Optional<Customer> customer) {
+        Context context = new Context();
+        context.setVariable("user", customer.get());
+        context.setVariable("order", savedOrderedBook);
+        context.setVariable("orderDetail", orderDTO.getBook());
+        context.setVariable("id", String.format("%04d", savedOrderedBook.getId()));
+        return templateEngine.process("SuccessOrderEmail", context);
     }
 
 }

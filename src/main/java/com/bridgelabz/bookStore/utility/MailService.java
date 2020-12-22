@@ -1,11 +1,13 @@
 package com.bridgelabz.bookStore.utility;
 
-import com.bridgelabz.bookStore.customer.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
 
 @Service
 public class MailService {
@@ -13,13 +15,14 @@ public class MailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public void sendSimpleMessage(String email, String messageSub, String messageBody) {
-        SimpleMailMessage mail = new SimpleMailMessage();
+    public void sendSimpleMessage(String email, String messageSub, String messageBody) throws MessagingException {
+        javax.mail.internet.MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mail = new MimeMessageHelper(mimeMessage);
         mail.setFrom("nnalin04@gmail.com");
         mail.setTo(email);
         mail.setSubject(messageSub);
-        mail.setText(messageBody);
-        javaMailSender.send(mail);
+        mail.setText(messageBody, true);
+        javaMailSender.send(mimeMessage);
     }
 
     public void sendResetMessage(String email, String message) throws MailException {

@@ -1,0 +1,72 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link  href="../static/css/main.css">
+    <style>
+        .emailBody {
+            text-align: left;
+        }
+
+        .emailHeading {
+            padding-bottom: 15px;
+        }
+
+        .headingContent {
+            font-size: larger;
+            line-height: 5px;
+            font-family: Roboto,sans-serif;
+        }
+
+        .orderedPlaced {
+            font-size: medium;
+            line-height: 10px;
+            padding-bottom: 15px;
+            font-family: Roboto,sans-serif;
+        }
+
+        .emailOrderedDetail {
+            font-size: medium;
+            line-height: 0;
+            font-family: Roboto,sans-serif;
+        }
+
+        .listBody {
+            padding-top: 10px;
+            padding-bottom: 15px;
+        }
+    </style>
+    <title>Email</title>
+</head>
+<body>
+<div class="emailBody">
+    <div class="emailHeading">
+        <p class="headingContent">Hi,</p>
+        <p class="headingContent" th:text="${user.fullName}"></p>
+    </div>
+
+    <div class="orderedPlaced" th:text="'Your Order Was Placed on '+ ${order.deliveredDate}"></div>
+    <div class="listBody">
+        <div class="emailOrderedDetail">Order Detail</div>
+        <ul>
+            <li th:text="'Order Id : '+ ${id}"></li>
+            <li th:text="'Book Name : '+ ${orderDetail.bookName}"></li>
+            <li th:text="'Author Name : '+ ${orderDetail.authorName}"></li>
+            <li th:text="'Price : '+ ${orderDetail.price}"></li>
+            <li th:text="'Quantity Ordered : '+ ${order.quantityForOrder}"></li>
+            <li th:text="'Total Price : '+ ${orderDetail.price} * ${order.quantityForOrder}"></li>
+        </ul>
+    </div>
+    <div>
+        <div class="emailOrderedDetail">For further contact</div>
+        <ul>
+            <li>email : xyz@gmail.com</li>
+            <li>Mobile No. : 9876543210</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

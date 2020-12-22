@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping(path = "/bookstoreOrders")
@@ -26,14 +28,14 @@ public class BookStoreOrdersController {
 
     @PostMapping("/{userToken}")
     public ResponseEntity<ReturnOrder> checkOut(@PathVariable String userToken,
-                                         @RequestBody OrderDTO orderDTO) {
+                                         @RequestBody OrderDTO orderDTO) throws MessagingException {
         ReturnOrder returnOrder = iOrderedService.checkOut(userToken, orderDTO);
         return new ResponseEntity<>(returnOrder, HttpStatus.OK);
     }
 
     @PutMapping("/{userToken}")
     public ResponseEntity<String> orderDelivery(@PathVariable String userToken,
-                                                @RequestBody BookDTO bookDTO){
+                                                @RequestBody BookDTO bookDTO) throws MessagingException {
         String message = iOrderedService.orderDelivery(userToken, bookDTO);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
