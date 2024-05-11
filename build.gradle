@@ -17,11 +17,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.jetbrains:annotations:19.0.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.5'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -36,6 +37,16 @@ dependencies {
 	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.6.1'
 	// https://mvnrepository.com/artifact/org.postgresql/postgresql
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.9'
+	compile 'com.google.code.gson:gson:2.2.+'
+	compile "com.opencsv:opencsv:4.0"
+	compile(files("./libs/CSVBuilder.main.jar"))
+	// https://mvnrepository.com/artifact/org.hibernate/hibernate-validator
+	compile group: 'org.hibernate', name: 'hibernate-validator', version: '6.1.1.Final'
+	compile 'org.elasticsearch:elasticsearch:7.10.1'
+	compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.10.1'
+	compile 'org.elasticsearch.client:elasticsearch-rest-client-sniffer:7.10.1'
+	compile 'org.elasticsearch.client:transport:7.10.1'
+
 }
 
 test {
